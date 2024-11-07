@@ -34,9 +34,9 @@ dependencies {
     implementation 'org.springframework.security:spring-security-test'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
-    compileOnly 'io.jsonwebtoken:jjwt-api:0.11.4'
-    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.4'
-    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.4'
+    compileOnly 'io.jsonwebtoken:jjwt-api:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
     // Guava
     implementation("com.google.guava:guava:33.3.1-jre")
