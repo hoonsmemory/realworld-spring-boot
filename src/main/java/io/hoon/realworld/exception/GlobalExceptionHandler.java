@@ -45,7 +45,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     ProblemDetail handleDataIntegrityViolation(DataIntegrityViolationException e) {
         log.info(e.getMessage(), e);
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "A unique constraint or primary key constraint has been violated due to duplicate data.");
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, Error.DUPLICATE_DATA.getMessage());
     }
 
     /**
@@ -58,6 +58,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(Exception.class)
     ProblemDetail handle(Exception e) {
         log.error(e.getMessage(), e);
-        return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "Please contact the administrator.");
+        return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, Error.CONTACT_ADMIN.getMessage());
     }
 }
