@@ -1,5 +1,6 @@
 package io.hoon.realworld.api.controller.user;
 
+import io.hoon.realworld.api.controller.user.request.UserLoginRequest;
 import io.hoon.realworld.api.controller.user.request.UserSignUpRequest;
 import io.hoon.realworld.api.service.user.UserService;
 import io.hoon.realworld.api.service.user.response.UserSingleResponse;
@@ -18,5 +19,10 @@ public class UserController {
     @PostMapping("/api/users")
     public UserSingleResponse signUp(@Valid @RequestBody UserSignUpRequest request) {
         return userService.signUp(request.toServiceRequest());
+    }
+
+    @PostMapping("/api/users/login")
+    public UserSingleResponse login(@Valid @RequestBody UserLoginRequest request) {
+        return userService.login(request.toServiceRequest());
     }
 }
