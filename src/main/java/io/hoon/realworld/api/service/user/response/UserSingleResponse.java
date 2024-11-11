@@ -10,16 +10,16 @@ import lombok.Getter;
 public class UserSingleResponse {
 
     private String email;
+    private String token;
     private String username;
-    private String password;
     private String bio;
     private String image;
 
     @Builder
-    private UserSingleResponse(String email, String username, String password, String bio, String image) {
+    private UserSingleResponse(String email, String token, String username, String bio, String image) {
         this.email = email;
+        this.token = token;
         this.username = username;
-        this.password = password;
         this.bio = bio;
         this.image = image;
     }
@@ -27,8 +27,8 @@ public class UserSingleResponse {
     public static UserSingleResponse of(User user) {
         return UserSingleResponse.builder()
                                  .email(user.getEmail())
+                                 .token(user.getToken())
                                  .username(user.getUserName())
-                                 .password(user.getPassword())
                                  .bio(user.getBio())
                                  .image(user.getImage())
                                  .build();
