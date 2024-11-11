@@ -1,6 +1,7 @@
 package io.hoon.realworld.domain.user;
 
 import io.hoon.realworld.IntegrationTestSupport;
+import io.hoon.realworld.exception.Error;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,9 @@ class UserRepositoryTest extends IntegrationTestSupport {
         userRepository.save(user);
 
         // When
-        User byEmail = userRepository.findByEmail(email);
+        User byEmail = userRepository.findByEmail(email).orElseGet(() -> {
+            throw new IllegalArgumentException(Error.USER_NOT_FOUND.getMessage());
+        });
 
         // Then
     	assertEquals(user.getEmail(), byEmail.getEmail());
