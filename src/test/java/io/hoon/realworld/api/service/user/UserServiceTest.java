@@ -8,6 +8,7 @@ import io.hoon.realworld.api.service.user.response.UserSingleResponse;
 import io.hoon.realworld.domain.user.User;
 import io.hoon.realworld.domain.user.UserRepository;
 import io.hoon.realworld.exception.Error;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,11 @@ class UserServiceTest extends IntegrationTestSupport {
     private static final String email = "hoon@email.com";
     private static final String password = "password";
 
+    @AfterEach
+    void tearDown() {
+        userRepository.deleteAll();
+    }
+
     @Test
     @DisplayName("신규 화원을 등록한다.")
     void singUp() throws Exception {
@@ -47,8 +53,10 @@ class UserServiceTest extends IntegrationTestSupport {
                                      .orElseThrow(() -> new IllegalArgumentException(Error.USER_NOT_FOUND.getMessage()));
 
         assertThat(response)
-                .extracting("email", "username", "password")
-                .contains("hoon", "hoon@email.com", byEmail.getPassword());
+                .extracting("email", "username")
+                .contains(email, username);
+
+        assertThat(byEmail.getPassword()).isNotEqualTo(password);
     }
 
     @Test

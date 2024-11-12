@@ -3,9 +3,11 @@ package io.hoon.realworld.security;
 import io.hoon.realworld.IntegrationTestSupport;
 import io.hoon.realworld.domain.user.User;
 import io.hoon.realworld.domain.user.UserRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -20,8 +22,14 @@ class BearerTokenSupplierTest extends IntegrationTestSupport {
     @Autowired
     BearerTokenSupplier bearerTokenSupplier;
 
+    @AfterEach
+    void tearDown() {
+        userRepository.deleteAll();
+    }
+
     @Test
     @DisplayName("회원 정보를 이용하여 JWT 토큰을 생성한다.")
+    @Transactional
     void Supply() {
         // Given
         // -- 회원가입

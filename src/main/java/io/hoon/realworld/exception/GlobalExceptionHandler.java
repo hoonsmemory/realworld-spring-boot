@@ -48,13 +48,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, Error.DUPLICATE_DATA.getMessage());
     }
 
-    /**
-     * Errors that the developer did not expect are handled here and the log level is recorded as
-     * error.
-     *
-     * @param e Exception
-     * @return ProblemDetail
-     */
+    @ExceptionHandler(IllegalStateException.class)
+    ProblemDetail handle(IllegalStateException e) {
+        log.info(e.getMessage(), e);
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+
+
+
     @ExceptionHandler(Exception.class)
     ProblemDetail handle(Exception e) {
         log.error(e.getMessage(), e);

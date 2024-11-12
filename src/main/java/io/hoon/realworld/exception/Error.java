@@ -9,7 +9,9 @@ public enum Error {
     DUPLICATE_DATA("A unique constraint or primary key constraint has been violated due to duplicate data."),
     MULTIPLE_TOKENS_FOUND("Found multiple bearer tokens in the request."),
     CONTACT_ADMIN("Please contact the administrator."),
-    EMAIL_ALREADY_EXIST("The email already exists.");
+    EMAIL_ALREADY_EXIST("The email already exists."),
+    ALREADY_FOLLOWING_USER("Already following the user");
+
 
     private final String message;
 

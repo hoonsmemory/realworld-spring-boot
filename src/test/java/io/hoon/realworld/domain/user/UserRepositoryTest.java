@@ -2,6 +2,7 @@ package io.hoon.realworld.domain.user;
 
 import io.hoon.realworld.IntegrationTestSupport;
 import io.hoon.realworld.exception.Error;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,11 @@ class UserRepositoryTest extends IntegrationTestSupport {
 
     @Autowired
     UserRepository userRepository;
+
+    @AfterEach
+    void tearDown() {
+        userRepository.deleteAll();
+    }
 
     @Test
     @DisplayName("이메일로 회원을 조회한다.")
