@@ -40,7 +40,8 @@ public class User extends BaseEntity {
     private boolean anonymous;
 
     @Builder
-    private User(String email, String userName, String password, String bio, String image, String token, boolean anonymous) {
+    private User(Long id, String email, String userName, String password, String bio, String image, String token, boolean anonymous) {
+        this.id = id;
         this.email = email;
         this.userName = userName;
         this.password = password;
