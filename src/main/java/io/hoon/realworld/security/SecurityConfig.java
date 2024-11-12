@@ -46,7 +46,10 @@ public class SecurityConfig {
                    .formLogin(AbstractHttpConfigurer::disable) // 폼 로그인 비활성화
                    .cors(withDefaults()) // CORS 설정 활성화
                    .authorizeHttpRequests( // HTTP 요청에 대한 권한 설정
-                           requests -> requests.requestMatchers(HttpMethod.POST, "/api/users", "/api/users/login")
+                           requests -> requests.requestMatchers(
+                                                       HttpMethod.POST,
+                                                       "/api/users",
+                                                       "/api/users/login")
                                                .permitAll() // 특정 POST 요청에 대해 모든 회원에게 접근 허용
                                                .requestMatchers(
                                                        HttpMethod.GET,

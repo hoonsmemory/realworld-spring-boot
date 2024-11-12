@@ -73,7 +73,7 @@ public class QueryFormattingConfig {
             Stack<String> callstack = new Stack<>();
             stream(new Throwable().getStackTrace())
                     .map(StackTraceElement::toString)
-                    .filter(stack -> stack.startsWith("io.github.shirohoo")
+                    .filter(stack -> stack.startsWith("io.hoon.realworld")
                             && !stack.contains(getClass().getSimpleName()))
                     .forEach(callstack::push);
 

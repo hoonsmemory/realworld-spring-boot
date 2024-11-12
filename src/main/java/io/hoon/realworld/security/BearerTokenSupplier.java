@@ -22,7 +22,7 @@ public class BearerTokenSupplier {
         JwtClaimsSet claimsSet = JwtClaimsSet.builder()
                                              .issuer("https://realworld.hoon.io") // 발행자
                                              .issuedAt(now) // 발행 시간
-                                             .expiresAt(now.plusSeconds(300)) // 만료 시간 (300초 후)
+                                             .expiresAt(now.plusSeconds(3600)) // 만료 시간 (3600초 후)
                                              .subject(user.getId().toString()) // 주제 (사용자 ID)
                                              .build();
 

@@ -1,3 +1,4 @@
+# 공통 설정
 spring:
   profiles:
     default: local
@@ -20,7 +21,20 @@ security:
     private: classpath:app.key
     public: classpath:app.pub
 
+decorator:
+  datasource:
+    p6spy:
+      enable-logging: true
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.security.oauth2: DEBUG
+    org.springframework.security.web.FilterChainProxy: DEBUG
+
 ---
+
+# local 프로파일 설정
 spring:
   config:
     activate:
@@ -39,17 +53,9 @@ spring:
     console:
       enabled: true
 
-security:
-  key:
-    private: classpath:app.key
-    public: classpath:app.pub
-
-decorator:
-  datasource:
-    p6spy:
-      enable-logging: true
-
 ---
+
+# test 프로파일 설정
 spring:
   config:
     activate:
@@ -66,13 +72,3 @@ spring:
   sql:
     init:
       mode: never
-
-security:
-  key:
-    private: classpath:app.key
-    public: classpath:app.pub
-
-decorator:
-  datasource:
-    p6spy:
-      enable-logging: true
