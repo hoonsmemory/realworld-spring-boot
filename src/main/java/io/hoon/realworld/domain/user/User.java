@@ -75,6 +75,27 @@ public class User extends BaseEntity {
         this.token = token;
         return this;
     }
+
+
+    public void updateEmail(String email) {
+        this.email = email;
+    }
+
+    public void updateUsername(String userName) {
+        this.userName = userName;
+    }
+
+    public void updatePassword(String password, PasswordEncoder passwordEncoder) {
+        this.password = passwordEncoder.encode(password);
+    }
+
+    public void updateBio(String bio) {
+        this.bio = bio;
+    }
+
+    public void updateImage(String image) {
+        this.image = image;
+    }
 }
 
 

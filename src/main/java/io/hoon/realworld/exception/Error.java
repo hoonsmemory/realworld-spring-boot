@@ -8,7 +8,8 @@ public enum Error {
     INVALID_EMAIL_OR_PASSWORD("The email or password does not match."),
     DUPLICATE_DATA("A unique constraint or primary key constraint has been violated due to duplicate data."),
     MULTIPLE_TOKENS_FOUND("Found multiple bearer tokens in the request."),
-    CONTACT_ADMIN("Please contact the administrator.");
+    CONTACT_ADMIN("Please contact the administrator."),
+    EMAIL_ALREADY_EXIST("The email already exists.");
 
     private final String message;
 
