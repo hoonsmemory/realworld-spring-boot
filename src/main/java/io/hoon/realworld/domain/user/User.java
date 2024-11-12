@@ -24,7 +24,7 @@ public class User extends BaseEntity {
     private String email;
 
     @Column(length = 50, nullable = false)
-    private String userName;
+    private String username;
 
     @Column(length = 200, nullable = false)
     private String password;
@@ -40,10 +40,10 @@ public class User extends BaseEntity {
     private boolean anonymous;
 
     @Builder
-    private User(Long id, String email, String userName, String password, String bio, String image, String token, boolean anonymous) {
+    private User(Long id, String email, String username, String password, String bio, String image, String token, boolean anonymous) {
         this.id = id;
         this.email = email;
-        this.userName = userName;
+        this.username = username;
         this.password = password;
         this.bio = bio;
         this.image = image;
@@ -51,10 +51,10 @@ public class User extends BaseEntity {
         this.anonymous = anonymous;
     }
 
-    public static User create(String email, String userName, String password) {
+    public static User create(String email, String username, String password) {
         return User.builder()
                    .email(email)
-                   .userName(userName)
+                   .username(username)
                    .password(password)
                    .build();
     }
@@ -81,8 +81,8 @@ public class User extends BaseEntity {
         this.email = email;
     }
 
-    public void updateUsername(String userName) {
-        this.userName = userName;
+    public void updateUsername(String username) {
+        this.username = username;
     }
 
     public void updatePassword(String password, PasswordEncoder passwordEncoder) {

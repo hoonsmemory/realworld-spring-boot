@@ -20,7 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class UserControllerTest extends ControllerTestSupport {
 
     private static final String email = "hoon@email.com";
-    private static final String userName = "hoon";
+    private static final String username = "hoon";
     private static final String password = "password";
 
     @DisplayName("신규 회원을 등록한다.")
@@ -29,13 +29,13 @@ class UserControllerTest extends ControllerTestSupport {
         // given
         UserSignUpRequest request = UserSignUpRequest.builder()
                                                      .email(email)
-                                                     .username(userName)
+                                                     .username(username)
                                                      .password(password)
                                                      .build();
 
         UserSingleResponse userSingleResponse = UserSingleResponse.builder()
                                                                   .email(email)
-                                                                  .username(userName)
+                                                                  .username(username)
                                                                   .build();
 
         when(userService.signUp(any())).thenReturn(userSingleResponse);
@@ -50,7 +50,7 @@ class UserControllerTest extends ControllerTestSupport {
                .andExpect(status().isOk())
                .andExpect(jsonPath("$.user.email").value(email))
                .andExpect(jsonPath("$.user.token").value(nullValue()))
-               .andExpect(jsonPath("$.user.username").value(userName))
+               .andExpect(jsonPath("$.user.username").value(username))
                .andExpect(jsonPath("$.user.bio").value(nullValue()))
                .andExpect(jsonPath("$.user.image").value(nullValue()));
     }
@@ -60,7 +60,7 @@ class UserControllerTest extends ControllerTestSupport {
     void signUpWithoutEmail() throws Exception {
         // given
         UserSignUpRequest request = UserSignUpRequest.builder()
-                                                     .username(userName)
+                                                     .username(username)
                                                      .password(password)
                                                      .build();
 
@@ -99,7 +99,7 @@ class UserControllerTest extends ControllerTestSupport {
         // given
         UserSignUpRequest request = UserSignUpRequest.builder()
                                                      .email(email)
-                                                     .username(userName)
+                                                     .username(username)
                                                      .build();
 
         // when // then
@@ -123,7 +123,7 @@ class UserControllerTest extends ControllerTestSupport {
 
         when(userService.login(any())).thenReturn(UserSingleResponse.builder()
                                                                     .email(email)
-                                                                    .username(userName)
+                                                                    .username(username)
                                                                     .token("eyJ")
                                                                     .build());
 
@@ -137,7 +137,7 @@ class UserControllerTest extends ControllerTestSupport {
                .andExpect(status().isOk())
                .andExpect(jsonPath("$.user.email").value(email))
                .andExpect(jsonPath("$.user.token").value(notNullValue()))
-               .andExpect(jsonPath("$.user.username").value(userName))
+               .andExpect(jsonPath("$.user.username").value(username))
                .andExpect(jsonPath("$.user.bio").value(nullValue()))
                .andExpect(jsonPath("$.user.image").value(nullValue()));
     }

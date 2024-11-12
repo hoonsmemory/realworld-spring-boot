@@ -25,7 +25,7 @@ class UserServiceTest extends IntegrationTestSupport {
     @Autowired
     private UserRepository userRepository;
 
-    private static final String userName = "hoon";
+    private static final String username = "hoon";
     private static final String email = "hoon@email.com";
     private static final String password = "password";
 
@@ -34,7 +34,7 @@ class UserServiceTest extends IntegrationTestSupport {
     void singUp() throws Exception {
         // Given
         UserSignUpServiceRequest request = UserSignUpServiceRequest.builder()
-                                                                   .username(userName)
+                                                                   .username(username)
                                                                    .email(email)
                                                                    .password(password)
                                                                    .build();
@@ -57,7 +57,7 @@ class UserServiceTest extends IntegrationTestSupport {
         // Given
         // - 회원가입
         UserSignUpServiceRequest signUpRequest = UserSignUpServiceRequest.builder()
-                                                                         .username(userName)
+                                                                         .username(username)
                                                                          .email(email)
                                                                          .password(password)
                                                                          .build();
@@ -76,7 +76,7 @@ class UserServiceTest extends IntegrationTestSupport {
         // Then
         assertThat(response)
                 .extracting("email", "username")
-                .contains(email, userName);
+                .contains(email, username);
 
         assertThat(response.getToken()).isNotNull()
                                        .matches("^[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_.+/=]*$");
@@ -89,7 +89,7 @@ class UserServiceTest extends IntegrationTestSupport {
         // Given
         // - 회원가입
         UserSignUpServiceRequest signUpRequest = UserSignUpServiceRequest.builder()
-                                                                   .username(userName)
+                                                                   .username(username)
                                                                    .email(email)
                                                                    .password(password)
                                                                    .build();

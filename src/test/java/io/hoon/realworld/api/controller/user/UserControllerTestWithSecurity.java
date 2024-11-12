@@ -31,7 +31,7 @@ public class UserControllerTestWithSecurity extends IntegrationTestSupport {
     private UserService userService;
 
     private static final String email = "hoon@email.com";
-    private static final String userName = "hoon";
+    private static final String username = "hoon";
     private static final String password = "password";
     private UserSingleResponse response = null;
 
@@ -40,7 +40,7 @@ public class UserControllerTestWithSecurity extends IntegrationTestSupport {
         // Given
         // - 회원가입
         UserSignUpServiceRequest signUpRequest = UserSignUpServiceRequest.builder()
-                                                                         .username(userName)
+                                                                         .username(username)
                                                                          .email(email)
                                                                          .password(password)
                                                                          .build();
@@ -68,7 +68,7 @@ public class UserControllerTestWithSecurity extends IntegrationTestSupport {
                .andExpect(status().isOk())
                .andExpect(jsonPath("$.user.email").value(email))
                .andExpect(jsonPath("$.user.token").value(notNullValue()))
-               .andExpect(jsonPath("$.user.username").value(userName))
+               .andExpect(jsonPath("$.user.username").value(username))
                .andExpect(jsonPath("$.user.bio").value(nullValue()))
                .andExpect(jsonPath("$.user.image").value(nullValue()));
     }

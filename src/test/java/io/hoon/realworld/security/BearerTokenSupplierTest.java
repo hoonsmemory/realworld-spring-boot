@@ -25,10 +25,10 @@ class BearerTokenSupplierTest extends IntegrationTestSupport {
     void Supply() {
         // Given
         // -- 회원가입
-        String userName = "hoon";
+        String username = "hoon";
         String email = "hoon@email.com";
         String password = "password";
-        User user = User.create(email, userName, password);
+        User user = User.create(email, username, password);
         userRepository.save(user);
 
         // -- 회원 조회

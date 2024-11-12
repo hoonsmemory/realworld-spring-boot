@@ -28,7 +28,7 @@ public class UserSingleResponse {
         return UserSingleResponse.builder()
                                  .email(user.getEmail())
                                  .token(user.getToken())
-                                 .username(user.getUserName())
+                                 .username(user.getUsername())
                                  .bio(user.getBio())
                                  .image(user.getImage())
                                  .build();
