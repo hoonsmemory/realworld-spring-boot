@@ -2,13 +2,13 @@ package io.hoon.realworld.api.controller.article;
 
 import io.hoon.realworld.IntegrationTestSupport;
 import io.hoon.realworld.api.controller.article.request.ArticleCreateRequest;
+import io.hoon.realworld.api.controller.article.request.ArticleUpdateRequest;
+import io.hoon.realworld.api.service.article.ArticleService;
+import io.hoon.realworld.api.service.article.response.ArticleSingleResponse;
 import io.hoon.realworld.api.service.user.UserService;
 import io.hoon.realworld.api.service.user.request.UserLoginServiceRequest;
 import io.hoon.realworld.api.service.user.request.UserSignUpServiceRequest;
 import io.hoon.realworld.api.service.user.response.UserSingleResponse;
-import io.hoon.realworld.domain.article.ArticleRepository;
-import io.hoon.realworld.domain.article.tag.TagRepository;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -31,6 +32,9 @@ class ArticleControllerTestWithSecurity extends IntegrationTestSupport {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private ArticleService articleService;
 
     private UserSingleResponse response = null;
 
@@ -140,6 +144,40 @@ class ArticleControllerTestWithSecurity extends IntegrationTestSupport {
                        .content(objectMapper.writeValueAsString(request)))
                .andDo(print())
                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("아티클의 제목, 설명, 내용을 변경한다.")
+    @Transactional
+    void updateArticle() throws Exception {
+        // Given
+        // -- 아티클 생성
+        ArticleCreateRequest articleCreateRequest = ArticleCreateRequest.builder()
+                                                                        .title("제목")
+                                                                        .description("설명")
+                                                                        .body("내용")
+                                                                        .tagList(List.of("tag1", "tag2"))
+                                                                        .build();
+        articleService.createArticle(articleCreateRequest.toServiceRequest());
+
+        // -- 아티클 변경
+        ArticleUpdateRequest articleUpdateRequest = ArticleUpdateRequest.builder()
+                                                                        .title("제목 변경")
+                                                                        .description("설명 변경")
+                                                                        .body("내용 변경")
+                                                                        .build();
+
+        // When // Then
+        mockMvc.perform(put("/api/articles/제목")
+                       .header("Authorization", "Token " + response.getToken())
+                       .contentType(MediaType.APPLICATION_JSON)
+                       .content(objectMapper.writeValueAsString(articleUpdateRequest)))
+               .andDo(print())
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.article.title").value("제목 변경"))
+               .andExpect(jsonPath("$.article.description").value("설명 변경"))
+               .andExpect(jsonPath("$.article.body").value("내용 변경"))
+               .andExpect(jsonPath("$.article.tagList").isNotEmpty());
     }
 
 }

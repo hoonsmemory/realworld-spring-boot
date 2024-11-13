@@ -10,7 +10,8 @@ public enum Error {
     MULTIPLE_TOKENS_FOUND("Found multiple bearer tokens in the request."),
     CONTACT_ADMIN("Please contact the administrator."),
     EMAIL_ALREADY_EXIST("The email already exists."),
-    ALREADY_FOLLOWING_USER("Already following the user");
+    ALREADY_FOLLOWING_USER("Already following the user"),
+    ARTICLE_NOT_FOUND("No aricle exists with the provided slug.");
 
 
     private final String message;

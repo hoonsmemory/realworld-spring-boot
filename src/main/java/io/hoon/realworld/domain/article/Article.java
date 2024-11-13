@@ -45,7 +45,7 @@ public class Article extends BaseEntity {
         article.slug = title.replaceAll(" ", "-")
                             .toLowerCase();
 
-        if (tagList == null) {
+        if (tagList == null || tagList.size() == 0) {
             return article;
         }
 
@@ -66,5 +66,19 @@ public class Article extends BaseEntity {
         if (tag.getArticle() != this) {
             tag.addArticle(this);
         }
+    }
+
+    public void updateTitle(String title) {
+        this.title = title;
+        this.slug = title.replaceAll(" ", "-")
+                         .toLowerCase();
+    }
+
+    public void updateDescription(String description) {
+        this.description = description;
+    }
+
+    public void updateBody(String body) {
+        this.body = body;
     }
 }
