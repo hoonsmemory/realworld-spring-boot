@@ -1,6 +1,8 @@
 package io.hoon.realworld.api.service.article.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
+import io.hoon.realworld.api.service.profile.response.ProfileSingleResponse;
 import io.hoon.realworld.domain.article.Article;
 import io.hoon.realworld.domain.article.tag.Tag;
 import lombok.Builder;
@@ -21,17 +23,21 @@ public class ArticleSingleResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    @JsonProperty("author")
+    private ProfileSingleResponse profileSingleResponse;
+
     @Builder
-    private ArticleSingleResponse(String title, String description, String body, List<String> tagList, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    private ArticleSingleResponse(String title, String description, String body, List<String> tagList, LocalDateTime createdAt, LocalDateTime updatedAt, ProfileSingleResponse profileSingleResponse) {
         this.title = title;
         this.description = description;
         this.body = body;
         this.tagList = tagList;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.profileSingleResponse = profileSingleResponse;
     }
 
-    public static ArticleSingleResponse of(Article savedArticle) {
+    public static ArticleSingleResponse of(Article savedArticle, boolean isFollow) {
         List<String> tagList = Optional.ofNullable(savedArticle.getTagList())
                                        .orElse(Collections.emptyList())
                                        .stream()
@@ -46,6 +52,7 @@ public class ArticleSingleResponse {
                                     .tagList(tagList)
                                     .createdAt(savedArticle.getCreatedAt())
                                     .updatedAt(savedArticle.getUpdatedAt())
+                                    .profileSingleResponse(ProfileSingleResponse.of(savedArticle.getAuthor(), isFollow))
                                     .build();
     }
 }

@@ -2,6 +2,7 @@ package io.hoon.realworld.domain.article;
 
 import io.hoon.realworld.domain.BaseEntity;
 import io.hoon.realworld.domain.article.tag.Tag;
+import io.hoon.realworld.domain.user.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -37,13 +38,16 @@ public class Article extends BaseEntity {
     @OneToMany(mappedBy = "article", cascade = CascadeType.ALL)
     private List<Tag> tagList = new ArrayList<>();
 
+    @JoinColumn(name = "author_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User author;
+
     public static Article create(String title, String description, String body, List<String> tagList) {
         Article article = new Article();
         article.title = title;
         article.description = description;
         article.body = body;
-        article.slug = title.replaceAll(" ", "-")
-                            .toLowerCase();
+        article.slug = title.replaceAll(" ", "-");
 
         if (tagList == null || tagList.size() == 0) {
             return article;
@@ -70,8 +74,7 @@ public class Article extends BaseEntity {
 
     public void updateTitle(String title) {
         this.title = title;
-        this.slug = title.replaceAll(" ", "-")
-                         .toLowerCase();
+        this.slug = title.replaceAll(" ", "-");
     }
 
     public void updateDescription(String description) {
@@ -80,5 +83,9 @@ public class Article extends BaseEntity {
 
     public void updateBody(String body) {
         this.body = body;
+    }
+
+    public void setAuthorId(User author) {
+        this.author = author;
     }
 }

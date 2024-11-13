@@ -17,13 +17,16 @@ public class ArticleController {
 
     @PostMapping("/api/articles")
     public ArticleSingleResponse createArticle(User user, @Valid @RequestBody ArticleCreateRequest request) {
-        return articleService.createArticle(request.toServiceRequest());
+        return articleService.createArticle(user.getId(), request.toServiceRequest());
     }
 
     @PutMapping("/api/articles/{slug}")
     public ArticleSingleResponse updateArticle(User user, @PathVariable String slug, @RequestBody ArticleUpdateRequest request) {
-        return articleService.updateArticle(slug, request.toServiceRequest());
+        return articleService.updateArticle(user.getId(), slug, request.toServiceRequest());
     }
 
-
+    @DeleteMapping("/api/articles/{slug}")
+    public void deleteArticle(User user, @PathVariable String slug) {
+        articleService.deleteArticle(user.getId(), slug);
+    }
 }

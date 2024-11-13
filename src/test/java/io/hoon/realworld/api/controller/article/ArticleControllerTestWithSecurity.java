@@ -4,11 +4,12 @@ import io.hoon.realworld.IntegrationTestSupport;
 import io.hoon.realworld.api.controller.article.request.ArticleCreateRequest;
 import io.hoon.realworld.api.controller.article.request.ArticleUpdateRequest;
 import io.hoon.realworld.api.service.article.ArticleService;
-import io.hoon.realworld.api.service.article.response.ArticleSingleResponse;
 import io.hoon.realworld.api.service.user.UserService;
 import io.hoon.realworld.api.service.user.request.UserLoginServiceRequest;
 import io.hoon.realworld.api.service.user.request.UserSignUpServiceRequest;
 import io.hoon.realworld.api.service.user.response.UserSingleResponse;
+import io.hoon.realworld.domain.article.ArticleRepository;
+import io.hoon.realworld.domain.user.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,9 +19,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -36,7 +38,12 @@ class ArticleControllerTestWithSecurity extends IntegrationTestSupport {
     @Autowired
     private ArticleService articleService;
 
+    @Autowired
+    private ArticleRepository articleRepository;
+
     private UserSingleResponse response = null;
+
+    private static long myId = 0l;
 
     @BeforeEach
     void setUp() {
@@ -56,6 +63,10 @@ class ArticleControllerTestWithSecurity extends IntegrationTestSupport {
                                                                       .build();
 
         response = userService.login(loginRequest);
+
+        //-- id 조회
+        Optional<User> user = userService.findByEmail(response.getEmail());
+        myId = user.get().getId();
     }
 
     @Test
@@ -158,7 +169,7 @@ class ArticleControllerTestWithSecurity extends IntegrationTestSupport {
                                                                         .body("내용")
                                                                         .tagList(List.of("tag1", "tag2"))
                                                                         .build();
-        articleService.createArticle(articleCreateRequest.toServiceRequest());
+        articleService.createArticle(myId, articleCreateRequest.toServiceRequest());
 
         // -- 아티클 변경
         ArticleUpdateRequest articleUpdateRequest = ArticleUpdateRequest.builder()
@@ -178,6 +189,30 @@ class ArticleControllerTestWithSecurity extends IntegrationTestSupport {
                .andExpect(jsonPath("$.article.description").value("설명 변경"))
                .andExpect(jsonPath("$.article.body").value("내용 변경"))
                .andExpect(jsonPath("$.article.tagList").isNotEmpty());
+    }
+
+    @Test
+    @DisplayName("아티클을 삭제한다.")
+    @Transactional
+    void deleteArticle() throws Exception {
+        // Given
+        // -- 아티클 생성
+        ArticleCreateRequest articleCreateRequest = ArticleCreateRequest.builder()
+                                                                        .title("아티클 제목")
+                                                                        .description("설명")
+                                                                        .body("내용")
+                                                                        .tagList(List.of("tag1", "tag2"))
+                                                                        .build();
+        articleService.createArticle(myId, articleCreateRequest.toServiceRequest());
+
+        // When // Then
+    	mockMvc.perform(delete("/api/articles/아티클-제목")
+                .header("Authorization", "Token " + response.getToken())
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk());
+
+        assertThat(articleRepository.findBySlug("아티클-제목")).isEmpty();
     }
 
 }
