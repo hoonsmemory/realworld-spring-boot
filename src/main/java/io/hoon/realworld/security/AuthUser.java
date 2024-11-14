@@ -13,9 +13,10 @@ public class AuthUser {
     private final String bio;
     private final String image;
     private final String password;
+    private final boolean anonymous;
 
     @Builder
-    private AuthUser(long id, String email, String token, String username, String bio, String image, String password) {
+    private AuthUser(long id, String email, String token, String username, String bio, String image, String password, boolean anonymous) {
         this.id = id;
         this.email = email;
         this.token = token;
@@ -23,6 +24,7 @@ public class AuthUser {
         this.bio = bio;
         this.image = image;
         this.password = password;
+        this.anonymous = anonymous;
     }
 
     public User toEntity() {

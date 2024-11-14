@@ -207,4 +207,28 @@ class ArticleServiceTest extends IntegrationTestSupport {
         assertThat(response).extracting("favorited", "favoritesCount")
                             .contains(false, 0);
     }
+
+    @Test
+    @DisplayName("하나의 아티클을 조회한다.")
+    void getArticle() throws Exception {
+        // Given
+        // -- 아티클 생성
+        ArticleSingleResponse article = articleService.createArticle(authUser, ArticleCreateServiceRequest.builder()
+                                                                                                          .title("아티클 제목")
+                                                                                                          .description("설명")
+                                                                                                          .body("내용")
+                                                                                                          .tagList(List.of("tag1", "tag2"))
+                                                                                                          .build());
+
+        AuthUser anonymous = AuthUser.builder()
+                                     .anonymous(true)
+                                     .build();
+
+        // When
+        ArticleSingleResponse response = articleService.getArticle(anonymous, article.getSlug());
+
+        // Then
+        assertThat(response).extracting("title", "description", "body", "tagList")
+                            .contains("아티클 제목", "설명", "내용", response.getTagList());
+    }
 }

@@ -1,7 +1,9 @@
 package io.hoon.realworld;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.hoon.realworld.api.controller.article.ArticleController;
 import io.hoon.realworld.api.controller.user.UserController;
+import io.hoon.realworld.api.service.article.ArticleService;
 import io.hoon.realworld.api.service.user.UserService;
 import io.hoon.realworld.config.AppConfig;
 import io.hoon.realworld.domain.user.UserRepository;
@@ -14,7 +16,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = {
-        UserController.class
+        UserController.class,
+        ArticleController.class
 })
 @Import({SecurityConfig.class, AppConfig.class})
 // 컨트롤러 전용 테스트
@@ -32,4 +35,7 @@ public abstract class ControllerTestSupport {
 
     @MockBean
     protected UserRepository userRepository;
+
+    @MockBean
+    protected ArticleService articleService;
 }

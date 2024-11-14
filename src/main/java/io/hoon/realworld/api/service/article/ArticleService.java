@@ -64,8 +64,7 @@ public class ArticleService {
     }
 
     private Article findArticleBySlugAndValidateAuthor(Long authorId, String slug) {
-        Article article = articleRepository.findBySlug(slug)
-                                           .orElseThrow(() -> new IllegalArgumentException(Error.ARTICLE_NOT_FOUND.getMessage()));
+        Article article = findBySlug(slug);
 
         Long getAuthorId = article.getAuthor().getId();
         if (!getAuthorId.equals(authorId)) {
@@ -77,46 +76,63 @@ public class ArticleService {
 
     @Transactional
     public ArticleSingleResponse favoriteArticle(AuthUser user, String slug) {
-        Article article = articleRepository.findBySlug(slug)
-                                           .orElseThrow(() -> new IllegalArgumentException(Error.ARTICLE_NOT_FOUND.getMessage()));
+        Article article = findBySlug(slug);
 
         favoriteRepository.findByArticleIdAndUserId(article.getId(), user.getId())
                           .ifPresent(favorite -> {
                               throw new IllegalStateException(Error.ALREADY_FAVORITED.getMessage());
                           });
+        
+        article.favorite(favoriteRepository.save(Favorite.create(article, user.toEntity())));
 
-        Favorite favorite = favoriteRepository.save(Favorite.create(article, user.toEntity()));
-        article.favorite(favorite);
+        AddtionalInfo addtionalInfo = getArticleAdditionalInfo(user, article);
 
-        ProfileSingleResponse profile = profileService.get(user.getId(), article.getAuthor().getUsername());
-
-        List<Favorite> favoriteList = article.getFavoriteList();
-        int favoritesCount = favoriteList.size();
-        boolean favorited = favoriteList.stream()
-                                        .anyMatch(f -> f.getUser()
-                                                        .getId()
-                                                        .equals(user.getId()));
-
-        return ArticleSingleResponse.of(article, profile.isFollowing(), favorited, favoritesCount);
+        return ArticleSingleResponse.of(article, addtionalInfo.isFollowing(), true, addtionalInfo.favoritesCount());
     }
-
+    
     @Transactional
     public ArticleSingleResponse unfavoriteArticle(AuthUser user, String slug) {
-        Article article = articleRepository.findBySlug(slug)
-                                           .orElseThrow(() -> new IllegalArgumentException(Error.ARTICLE_NOT_FOUND.getMessage()));
+        Article article = findBySlug(slug);
+        
+        article.unfavorite(favoriteRepository.findByArticleIdAndUserId(article.getId(), user.getId())
+                                             .orElseThrow(() -> new IllegalArgumentException(Error.NOT_FAVORITED.getMessage())));
 
-        Favorite favorite = favoriteRepository.findByArticleIdAndUserId(article.getId(), user.getId())
-                                              .orElseThrow(() -> new IllegalArgumentException(Error.NOT_FAVORITED.getMessage()));
+        AddtionalInfo addtionalInfo = getArticleAdditionalInfo(user, article);
 
-        article.unfavorite(favorite);
+        return ArticleSingleResponse.of(article, addtionalInfo.isFollowing(), false, addtionalInfo.favoritesCount());
+    }
 
-        ProfileSingleResponse profile = profileService.get(user.getId(), article.getAuthor().getUsername());
+    public ArticleSingleResponse getArticle(AuthUser user, String slug) {
+        Article article = findBySlug(slug);
 
+        AddtionalInfo addtionalInfo = getArticleAdditionalInfo(user, article);
+
+        return ArticleSingleResponse.of(article, addtionalInfo.isFollowing(), addtionalInfo.favorited(), addtionalInfo.favoritesCount());
+    }
+
+    private Article findBySlug(String slug) {
+        return articleRepository.findBySlug(slug)
+                                .orElseThrow(() -> new IllegalArgumentException(Error.ARTICLE_NOT_FOUND.getMessage()));
+    }
+
+    private record AddtionalInfo(boolean isFollowing, boolean favorited, int favoritesCount) {}
+    private AddtionalInfo getArticleAdditionalInfo(AuthUser user, Article article) {
         List<Favorite> favoriteList = article.getFavoriteList();
         int favoritesCount = favoriteList.size();
 
-        return ArticleSingleResponse.of(article, profile.isFollowing(), false, favoritesCount);
+        boolean isFollowing = false;
+        boolean favorited = false;
+        if (user.isAnonymous()) {
+            return new AddtionalInfo(isFollowing, favorited, favoritesCount);
+        }
+
+        isFollowing = profileService.get(user.getId(), article.getAuthor().getUsername())
+                                    .isFollowing();
+        favorited = favoriteList.stream()
+                                .anyMatch(f -> f.getUser()
+                                                .getId()
+                                                .equals(user.getId()));
+
+        return new AddtionalInfo(isFollowing, favorited, favoritesCount);
     }
-
-
 }

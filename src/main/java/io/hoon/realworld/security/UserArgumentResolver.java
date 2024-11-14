@@ -37,7 +37,7 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
 
         // 인증 정보가 익명 사용자일 경우 익명 사용자 객체 반환
         if (authentication instanceof AnonymousAuthenticationToken) {
-            return AuthUser.builder().build();
+            return AuthUser.builder().anonymous(true).build();
         }
 
         // JWT 토큰에서 사용자 ID와 토큰 값 추출
@@ -55,6 +55,7 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
                                      .username(user.getUsername())
                                      .bio(user.getBio())
                                      .image(user.getImage())
+                                     .anonymous(false)
                                      .build())
                 .orElseThrow(() -> new InvalidBearerTokenException("`%s` is invalid token".formatted(token)));
     }

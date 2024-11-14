@@ -4,7 +4,6 @@ import io.hoon.realworld.api.controller.article.request.ArticleCreateRequest;
 import io.hoon.realworld.api.controller.article.request.ArticleUpdateRequest;
 import io.hoon.realworld.api.service.article.ArticleService;
 import io.hoon.realworld.api.service.article.response.ArticleSingleResponse;
-import io.hoon.realworld.domain.user.User;
 import io.hoon.realworld.security.AuthUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -39,5 +38,10 @@ public class ArticleController {
     @DeleteMapping("/api/articles/{slug}/favorite")
     public ArticleSingleResponse unfavoriteArticle(AuthUser user, @PathVariable String slug) {
         return articleService.unfavoriteArticle(user, slug);
+    }
+
+    @GetMapping("/api/articles/{slug}")
+    public ArticleSingleResponse getArticle(AuthUser user, @PathVariable String slug) {
+        return articleService.getArticle(user, slug);
     }
 }
