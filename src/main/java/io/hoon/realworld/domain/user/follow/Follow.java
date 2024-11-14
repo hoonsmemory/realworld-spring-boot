@@ -1,4 +1,4 @@
-package io.hoon.realworld.domain.follow;
+package io.hoon.realworld.domain.user.follow;
 
 import io.hoon.realworld.domain.BaseEntity;
 import io.hoon.realworld.domain.user.User;

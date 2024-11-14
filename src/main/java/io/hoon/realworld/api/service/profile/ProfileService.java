@@ -2,8 +2,8 @@ package io.hoon.realworld.api.service.profile;
 
 import io.hoon.realworld.api.service.profile.response.ProfileSingleResponse;
 import io.hoon.realworld.api.service.user.UserService;
-import io.hoon.realworld.domain.follow.Follow;
-import io.hoon.realworld.domain.follow.FollowRepository;
+import io.hoon.realworld.domain.user.follow.Follow;
+import io.hoon.realworld.domain.user.follow.FollowRepository;
 import io.hoon.realworld.domain.user.User;
 import io.hoon.realworld.exception.Error;
 import lombok.RequiredArgsConstructor;

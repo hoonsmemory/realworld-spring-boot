@@ -3,6 +3,8 @@ package io.hoon.realworld.domain.follow;
 import io.hoon.realworld.IntegrationTestSupport;
 import io.hoon.realworld.domain.user.User;
 import io.hoon.realworld.domain.user.UserRepository;
+import io.hoon.realworld.domain.user.follow.Follow;
+import io.hoon.realworld.domain.user.follow.FollowRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

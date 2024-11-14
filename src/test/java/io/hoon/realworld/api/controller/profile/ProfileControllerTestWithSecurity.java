@@ -7,7 +7,7 @@ import io.hoon.realworld.api.service.user.UserService;
 import io.hoon.realworld.api.service.user.request.UserLoginServiceRequest;
 import io.hoon.realworld.api.service.user.request.UserSignUpServiceRequest;
 import io.hoon.realworld.api.service.user.response.UserSingleResponse;
-import io.hoon.realworld.domain.follow.FollowRepository;
+import io.hoon.realworld.domain.user.follow.FollowRepository;
 import io.hoon.realworld.domain.user.User;
 import io.hoon.realworld.domain.user.UserRepository;
 import org.junit.jupiter.api.AfterEach;

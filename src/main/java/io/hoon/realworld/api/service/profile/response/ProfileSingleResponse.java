@@ -1,8 +1,6 @@
 package io.hoon.realworld.api.service.profile.response;
 
 import com.fasterxml.jackson.annotation.JsonRootName;
-import io.hoon.realworld.api.service.user.response.UserSingleResponse;
-import io.hoon.realworld.domain.follow.Follow;
 import io.hoon.realworld.domain.user.User;
 import lombok.Builder;
 import lombok.Getter;

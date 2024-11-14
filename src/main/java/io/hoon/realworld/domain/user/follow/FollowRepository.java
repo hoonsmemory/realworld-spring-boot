@@ -1,4 +1,4 @@
-package io.hoon.realworld.domain.follow;
+package io.hoon.realworld.domain.user.follow;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
