@@ -221,4 +221,53 @@ class ArticleControllerTestWithSecurity extends IntegrationTestSupport {
         assertThat(articleRepository.findBySlug("아티클-제목")).isEmpty();
     }
 
+    @Test
+    @DisplayName("아티클을 즐겨찾기한다.")
+    @Transactional
+    void favorite() throws Exception {
+        // Given
+        ArticleCreateRequest articleCreateRequest = ArticleCreateRequest.builder()
+                                                                        .title("아티클 제목")
+                                                                        .description("설명")
+                                                                        .body("내용")
+                                                                        .tagList(List.of("tag1", "tag2"))
+                                                                        .build();
+        articleService.createArticle(authUser, articleCreateRequest.toServiceRequest());
+
+        // When // Then
+        mockMvc.perform(post("/api/articles/아티클-제목/favorite")
+                       .header("Authorization", "Token " + token)
+                       .contentType(MediaType.APPLICATION_JSON))
+               .andDo(print())
+               .andExpect(status().isOk())
+                .andExpect(jsonPath("$.article.favorited").value(true))
+                .andExpect(jsonPath("$.article.favoritesCount").value(1));
+    }
+
+    @Test
+    @DisplayName("즐겨찾기한 아티클을 취소한다.")
+    void unfavorite() throws Exception {
+        // Given
+        // -- 아티클 생성
+        ArticleCreateRequest articleCreateRequest = ArticleCreateRequest.builder()
+                                                                        .title("아티클 제목")
+                                                                        .description("설명")
+                                                                        .body("내용")
+                                                                        .tagList(List.of("tag1", "tag2"))
+                                                                        .build();
+        articleService.createArticle(authUser, articleCreateRequest.toServiceRequest());
+
+        // -- 아티클 즐겨찾기
+        articleService.favoriteArticle(authUser, "아티클-제목");
+
+        // When // Then
+        mockMvc.perform(delete("/api/articles/아티클-제목/favorite")
+                       .header("Authorization", "Token " + token)
+                       .contentType(MediaType.APPLICATION_JSON))
+               .andDo(print())
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.article.favorited").value(false))
+               .andExpect(jsonPath("$.article.favoritesCount").value(0));
+    }
+
 }

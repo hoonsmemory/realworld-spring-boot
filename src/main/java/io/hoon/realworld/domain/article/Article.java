@@ -43,7 +43,7 @@ public class Article extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private User author;
 
-    @OneToMany(mappedBy = "article", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "article", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Favorite> favoriteList = new ArrayList<>();
 
     public static Article create(String title, String description, String body, List<String> tagList) {
@@ -102,10 +102,6 @@ public class Article extends BaseEntity {
 
     public void unfavorite(Favorite favorite) {
         this.favoriteList.remove(favorite);
-        if (favorite.getArticle() == this) {
-            favorite.setArticle(null);
-        }
     }
-
 
 }

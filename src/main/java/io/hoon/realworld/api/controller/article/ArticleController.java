@@ -30,4 +30,14 @@ public class ArticleController {
     public void deleteArticle(AuthUser user, @PathVariable String slug) {
         articleService.deleteArticle(user, slug);
     }
+
+    @PostMapping("/api/articles/{slug}/favorite")
+    public ArticleSingleResponse favoriteArticle(AuthUser user, @PathVariable String slug) {
+        return articleService.favoriteArticle(user, slug);
+    }
+
+    @DeleteMapping("/api/articles/{slug}/favorite")
+    public ArticleSingleResponse unfavoriteArticle(AuthUser user, @PathVariable String slug) {
+        return articleService.unfavoriteArticle(user, slug);
+    }
 }
