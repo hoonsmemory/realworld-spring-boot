@@ -14,7 +14,8 @@ public enum Error {
     ARTICLE_NOT_FOUND("No aricle exists with the provided slug."),
     FAILED_TO_DELETE("Failed to delete the article."),
     INVALID_TOKEN("Invalid token: You are not authorized to perform this action."),
-    ALREADY_FAVORITED("Already favorited the article.");
+    ALREADY_FAVORITED("Already favorited the article."),
+    NOT_FAVORITED("Not favorited the article."),;
 
 
     private final String message;

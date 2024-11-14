@@ -167,4 +167,35 @@ class ArticleServiceTest extends IntegrationTestSupport {
         assertThat(response).extracting("favorited", "favoritesCount")
                             .contains(true, 1);
     }
+
+    @Test
+    @DisplayName("즐겨찾기한 아티클을 취소한다.")
+    void unfavoriteArticle() throws Exception {
+        // Given
+        // -- 아티클 생성
+        ArticleSingleResponse article = articleService.createArticle(authorId, ArticleCreateServiceRequest.builder()
+                                                                                                          .title("아티클 제목")
+                                                                                                          .description("설명")
+                                                                                                          .body("내용")
+                                                                                                          .tagList(List.of("tag1", "tag2"))
+                                                                                                          .build());
+
+        UserSingleResponse userSingleResponse = userService.signUp(UserSignUpServiceRequest.builder()
+                                                                                           .email("emily@email.com")
+                                                                                           .username("emily")
+                                                                                           .password("1234")
+                                                                                           .build());
+
+        User user = userService.findByEmail(userSingleResponse.getEmail())
+                               .orElseThrow(() -> new IllegalArgumentException(Error.USER_NOT_FOUND.getMessage()));
+
+        articleService.favoriteArticle(user.getId(), article.getSlug());
+
+        // When
+        ArticleSingleResponse response = articleService.unfavoriteArticle(user.getId(), article.getSlug());
+
+        // Then
+        assertThat(response).extracting("favorited", "favoritesCount")
+                            .contains(false, 0);
+    }
 }

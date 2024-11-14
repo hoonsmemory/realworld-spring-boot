@@ -106,4 +106,26 @@ public class ArticleService {
 
         return ArticleSingleResponse.of(article, profile.isFollowing(), favorited, favoritesCount);
     }
+
+    @Transactional
+    public ArticleSingleResponse unfavoriteArticle(Long userId, String slug) {
+        Article article = articleRepository.findBySlug(slug)
+                                           .orElseThrow(() -> new IllegalArgumentException(Error.ARTICLE_NOT_FOUND.getMessage()));
+
+        User user = userService.findById(userId)
+                               .orElseThrow(() -> new IllegalArgumentException(Error.USER_NOT_FOUND.getMessage()));
+
+        Favorite favorite = favoriteRepository.findByArticleIdAndUserId(article.getId(), user.getId())
+                                               .orElseThrow(() -> new IllegalArgumentException(Error.NOT_FAVORITED.getMessage()));
+
+        article.getFavoriteList().remove(favorite);
+
+        ProfileSingleResponse profile = profileService.get(user.getId(), article.getAuthor()
+                                                                                .getUsername());
+
+        List<Favorite> favoriteList = article.getFavoriteList();
+        int favoritesCount = favoriteList.size();
+
+        return ArticleSingleResponse.of(article, profile.isFollowing(), false, favoritesCount);
+    }
 }
