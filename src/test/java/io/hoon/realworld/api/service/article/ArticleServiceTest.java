@@ -12,6 +12,7 @@ import io.hoon.realworld.domain.article.Article;
 import io.hoon.realworld.domain.article.ArticleRepository;
 import io.hoon.realworld.domain.user.User;
 import io.hoon.realworld.exception.Error;
+import io.hoon.realworld.security.AuthUser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,7 +35,7 @@ class ArticleServiceTest extends IntegrationTestSupport {
     @Autowired
     private UserService userService;
 
-    private UserSingleResponse response = null;
+    private AuthUser authUser;
     private static long authorId = 0l;
 
     @BeforeEach
@@ -47,15 +48,21 @@ class ArticleServiceTest extends IntegrationTestSupport {
                                                    .build());
 
         //-- 유저1 로그인
-        response = userService.login(UserLoginServiceRequest.builder()
-                                                            .email("hoon@email.com")
-                                                            .password("1234")
-                                                            .build());
+        userService.login(UserLoginServiceRequest.builder()
+                                                 .email("hoon@email.com")
+                                                 .password("1234")
+                                                 .build());
 
-        //-- id 조회
-        authorId = userService.findByEmail(response.getEmail())
-                              .get()
-                              .getId();
+        //-- user 조회
+        User user = userService.findByEmail("hoon@email.com")
+                               .get();
+        authUser = AuthUser.builder()
+                           .id(user.getId())
+                           .email(user.getEmail())
+                           .username(user.getUsername())
+                           .bio(user.getBio())
+                           .image(user.getImage())
+                           .build();
     }
 
     @Test
@@ -71,7 +78,7 @@ class ArticleServiceTest extends IntegrationTestSupport {
                                                                          .build();
 
         // When
-        ArticleSingleResponse response = articleService.createArticle(authorId, request);
+        ArticleSingleResponse response = articleService.createArticle(authUser, request);
 
         // Then
         assertThat(response)
@@ -89,7 +96,7 @@ class ArticleServiceTest extends IntegrationTestSupport {
     void test() throws Exception {
         // Given
         // -- 아티클 생성
-        articleService.createArticle(authorId, ArticleCreateServiceRequest.builder()
+        articleService.createArticle(authUser, ArticleCreateServiceRequest.builder()
                                                                           .title("제목")
                                                                           .description("설명")
                                                                           .body("내용")
@@ -103,7 +110,7 @@ class ArticleServiceTest extends IntegrationTestSupport {
                                                                          .body(Optional.of("내용 변경"))
                                                                          .build();
         // When
-        ArticleSingleResponse response = articleService.updateArticle(authorId, "제목", request);
+        ArticleSingleResponse response = articleService.updateArticle(authUser, "제목", request);
 
         // Then
         assertThat(response)
@@ -121,7 +128,7 @@ class ArticleServiceTest extends IntegrationTestSupport {
     void deleteArticle() throws Exception {
         // Given
         // -- 아티클 생성
-        ArticleSingleResponse article = articleService.createArticle(authorId, ArticleCreateServiceRequest.builder()
+        ArticleSingleResponse article = articleService.createArticle(authUser, ArticleCreateServiceRequest.builder()
                                                                                                           .title("아티클 제목")
                                                                                                           .description("설명")
                                                                                                           .body("내용")
@@ -129,7 +136,7 @@ class ArticleServiceTest extends IntegrationTestSupport {
                                                                                                           .build());
 
         // When
-        articleService.deleteArticle(authorId, article.getSlug());
+        articleService.deleteArticle(authUser, article.getSlug());
 
         // Then
         articleRepository.findBySlug(article.getSlug())
@@ -140,10 +147,11 @@ class ArticleServiceTest extends IntegrationTestSupport {
 
     @Test
     @DisplayName("어느 아티클을 즐겨찾기한다.")
+    @Transactional
     void favoriteArticle() throws Exception {
         // Given
         // -- 아티클 생성
-        ArticleSingleResponse article = articleService.createArticle(authorId, ArticleCreateServiceRequest.builder()
+        ArticleSingleResponse article = articleService.createArticle(authUser, ArticleCreateServiceRequest.builder()
                                                                                                           .title("아티클 제목")
                                                                                                           .description("설명")
                                                                                                           .body("내용")
@@ -156,12 +164,12 @@ class ArticleServiceTest extends IntegrationTestSupport {
                                                                                            .password("1234")
                                                                                            .build());
 
-        User user = userService.findByEmail(userSingleResponse.getEmail())
-                               .orElseThrow(() -> new IllegalArgumentException(Error.USER_NOT_FOUND.getMessage()));
+        userService.findByEmail(userSingleResponse.getEmail())
+                   .orElseThrow(() -> new IllegalArgumentException(Error.USER_NOT_FOUND.getMessage()));
 
 
         // When
-        ArticleSingleResponse response = articleService.favoriteArticle(user.getId(), article.getSlug());
+        ArticleSingleResponse response = articleService.favoriteArticle(authUser, article.getSlug());
 
         // Then
         assertThat(response).extracting("favorited", "favoritesCount")
@@ -170,10 +178,11 @@ class ArticleServiceTest extends IntegrationTestSupport {
 
     @Test
     @DisplayName("즐겨찾기한 아티클을 취소한다.")
+    @Transactional
     void unfavoriteArticle() throws Exception {
         // Given
         // -- 아티클 생성
-        ArticleSingleResponse article = articleService.createArticle(authorId, ArticleCreateServiceRequest.builder()
+        ArticleSingleResponse article = articleService.createArticle(authUser, ArticleCreateServiceRequest.builder()
                                                                                                           .title("아티클 제목")
                                                                                                           .description("설명")
                                                                                                           .body("내용")
@@ -189,10 +198,10 @@ class ArticleServiceTest extends IntegrationTestSupport {
         User user = userService.findByEmail(userSingleResponse.getEmail())
                                .orElseThrow(() -> new IllegalArgumentException(Error.USER_NOT_FOUND.getMessage()));
 
-        articleService.favoriteArticle(user.getId(), article.getSlug());
+        articleService.favoriteArticle(authUser, article.getSlug());
 
         // When
-        ArticleSingleResponse response = articleService.unfavoriteArticle(user.getId(), article.getSlug());
+        ArticleSingleResponse response = articleService.unfavoriteArticle(authUser, article.getSlug());
 
         // Then
         assertThat(response).extracting("favorited", "favoritesCount")

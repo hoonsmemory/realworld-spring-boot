@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -67,6 +68,7 @@ class ProfileServiceTest extends IntegrationTestSupport {
 
     @Test
     @DisplayName("다른 회원의 프로필을 조회한다.")
+    @Transactional
     void getProfile() throws Exception {
         // When
         ProfileSingleResponse response = profileService.get(myId, "hoon");
@@ -79,6 +81,7 @@ class ProfileServiceTest extends IntegrationTestSupport {
 
     @Test
     @DisplayName("hoon 이라는 이름을 가진 회원을 팔로우한다.")
+    @Transactional
     void follow() throws Exception {
         // When
         ProfileSingleResponse response = profileService.follow(myId, "hoon");
@@ -91,6 +94,7 @@ class ProfileServiceTest extends IntegrationTestSupport {
 
     @Test
     @DisplayName("hoon 이라는 이름을 가진 회원을 언팔로우한다.")
+    @Transactional
     void unfollow() throws Exception {
         // Given
         profileService.follow(myId, "hoon");

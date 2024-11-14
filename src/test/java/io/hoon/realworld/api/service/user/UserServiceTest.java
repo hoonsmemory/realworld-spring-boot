@@ -8,6 +8,7 @@ import io.hoon.realworld.api.service.user.response.UserSingleResponse;
 import io.hoon.realworld.domain.user.User;
 import io.hoon.realworld.domain.user.UserRepository;
 import io.hoon.realworld.exception.Error;
+import io.hoon.realworld.security.AuthUser;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -103,8 +104,13 @@ class UserServiceTest extends IntegrationTestSupport {
                                                                    .build();
 
         userService.signUp(signUpRequest);
-        Optional<User> byEmail = userRepository.findByEmail(signUpRequest.getEmail());
-
+        Optional<User> user = userRepository.findByEmail(signUpRequest.getEmail());
+        AuthUser authUser = AuthUser.builder()
+                                    .id(user.get().getId())
+                                    .email(user.get().getEmail())
+                                    .username(user.get().getUsername())
+                                    .password(user.get().getPassword())
+                                    .build();
 
         // - 회원 정보 수정
         String email = "update@email.com";
@@ -121,7 +127,7 @@ class UserServiceTest extends IntegrationTestSupport {
                                                                    .build();
 
         // When
-        UserSingleResponse response = userService.update(byEmail.get().getId(), updateRequest);
+        UserSingleResponse response = userService.update(authUser, updateRequest);
 
         // Then
         assertThat(response)

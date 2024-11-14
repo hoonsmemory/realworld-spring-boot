@@ -6,6 +6,7 @@ import io.hoon.realworld.api.controller.user.request.UserUpdateRequest;
 import io.hoon.realworld.api.service.user.UserService;
 import io.hoon.realworld.api.service.user.response.UserSingleResponse;
 import io.hoon.realworld.domain.user.User;
+import io.hoon.realworld.security.AuthUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -27,13 +28,13 @@ public class UserController {
     }
 
     @GetMapping("/api/user")
-    public UserSingleResponse get(User user) {
-        return UserSingleResponse.of(user);
+    public UserSingleResponse get(AuthUser user) {
+        return UserSingleResponse.of(user.toEntity());
     }
 
     @PutMapping("/api/user")
-    public UserSingleResponse update(User user, @RequestBody UserUpdateRequest request) {
-        return userService.update(user.getId(), request.toServiceRequest());
+    public UserSingleResponse update(AuthUser user, @RequestBody UserUpdateRequest request) {
+        return userService.update(user, request.toServiceRequest());
     }
 
 }

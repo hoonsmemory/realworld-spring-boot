@@ -1,7 +1,7 @@
 package io.hoon.realworld.security;
 
-import io.hoon.realworld.domain.user.User;
 import io.hoon.realworld.domain.user.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -14,8 +14,6 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import lombok.RequiredArgsConstructor;
-
 @RequiredArgsConstructor
 public class UserArgumentResolver implements HandlerMethodArgumentResolver {
     private final UserRepository userRepository;
@@ -23,7 +21,7 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
     // 컨트롤러 메서드의 인자가 User 타입인지 확인
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.getParameterType() == User.class;
+        return parameter.getParameterType() == AuthUser.class;
     }
 
     // 컨트롤러 메서드의 인자에 주입할 User 객체를 반환
@@ -39,7 +37,7 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
 
         // 인증 정보가 익명 사용자일 경우 익명 사용자 객체 반환
         if (authentication instanceof AnonymousAuthenticationToken) {
-            return User.anonymous();
+            return AuthUser.builder().build();
         }
 
         // JWT 토큰에서 사용자 ID와 토큰 값 추출
@@ -50,7 +48,14 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
         // 사용자 ID로 데이터베이스에서 사용자 조회 후 토큰 소유 여부 확인
         return userRepository
                 .findById(Long.parseLong(userId))
-                .map(user -> user.possessToken(token))
+                .map(user -> AuthUser.builder()
+                                     .id(user.getId())
+                                     .token(token)
+                                     .email(user.getEmail())
+                                     .username(user.getUsername())
+                                     .bio(user.getBio())
+                                     .image(user.getImage())
+                                     .build())
                 .orElseThrow(() -> new InvalidBearerTokenException("`%s` is invalid token".formatted(token)));
     }
 }

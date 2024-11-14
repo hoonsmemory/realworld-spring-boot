@@ -7,6 +7,7 @@ import io.hoon.realworld.api.service.user.response.UserSingleResponse;
 import io.hoon.realworld.domain.user.User;
 import io.hoon.realworld.domain.user.UserRepository;
 import io.hoon.realworld.exception.Error;
+import io.hoon.realworld.security.AuthUser;
 import io.hoon.realworld.security.BearerTokenSupplier;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -45,37 +46,36 @@ public class UserService {
     }
 
     @Transactional
-    public UserSingleResponse update(long id, UserUpdateServiceRequest request) {
-        User user = userRepository.findById(id)
-                                  .orElseThrow(() -> new IllegalArgumentException(Error.USER_NOT_FOUND.getMessage()));
+    public UserSingleResponse update(AuthUser user, UserUpdateServiceRequest request) {
+        User userEntity = user.toEntity();
 
         request.getEmail()
                .ifPresent(email -> {
 
                    // 이메일 중복 체크
                    userRepository.findByEmail(email).ifPresent(existUser -> {
-                       if (!existUser.equals(user)) {
+                       if (!existUser.getId().equals(user.getId())) {
                            throw new IllegalArgumentException(Error.EMAIL_ALREADY_EXIST.getMessage());
                        }
                    });
 
-                   user.updateEmail(email);
+                   userEntity.updateEmail(email);
                });
 
-
         request.getUsername()
-               .ifPresent(user::updateUsername);
+               .ifPresent(userEntity::updateUsername);
 
         request.getPassword()
-               .ifPresent(password -> user.updatePassword(password, passwordEncoder));
+               .ifPresent(password -> userEntity.updatePassword(password, passwordEncoder));
 
         request.getImage()
-               .ifPresent(user::updateImage);
+               .ifPresent(userEntity::updateImage);
 
         request.getBio()
-               .ifPresent(user::updateBio);
+               .ifPresent(userEntity::updateBio);
 
-        return UserSingleResponse.of(user);
+        User savedUser = userRepository.save(userEntity);
+        return UserSingleResponse.of(savedUser);
     }
 
     public Optional<User> findByEmail(String email) {

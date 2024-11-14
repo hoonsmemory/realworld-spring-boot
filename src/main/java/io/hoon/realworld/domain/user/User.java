@@ -36,11 +36,8 @@ public class User extends BaseEntity {
     @Transient
     private String token;
 
-    @Transient
-    private boolean anonymous;
-
     @Builder
-    private User(Long id, String email, String username, String password, String bio, String image, String token, boolean anonymous) {
+    private User(Long id, String email, String username, String password, String bio, String image, String token) {
         this.id = id;
         this.email = email;
         this.username = username;
@@ -48,7 +45,6 @@ public class User extends BaseEntity {
         this.bio = bio;
         this.image = image;
         this.token = token;
-        this.anonymous = anonymous;
     }
 
     public static User create(String email, String username, String password) {
@@ -63,19 +59,10 @@ public class User extends BaseEntity {
         this.password = passwordEncoder.encode(this.password);
     }
 
-    public static User anonymous() {
-        return User.builder().anonymous(true).build();
-    }
-
-    public boolean isAnonymous() {
-        return this.id == null && this.anonymous;
-    }
-
     public User possessToken(String token) {
         this.token = token;
         return this;
     }
-
 
     public void updateEmail(String email) {
         this.email = email;

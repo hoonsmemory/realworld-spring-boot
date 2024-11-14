@@ -7,9 +7,9 @@ import io.hoon.realworld.api.service.article.ArticleService;
 import io.hoon.realworld.api.service.user.UserService;
 import io.hoon.realworld.api.service.user.request.UserLoginServiceRequest;
 import io.hoon.realworld.api.service.user.request.UserSignUpServiceRequest;
-import io.hoon.realworld.api.service.user.response.UserSingleResponse;
 import io.hoon.realworld.domain.article.ArticleRepository;
 import io.hoon.realworld.domain.user.User;
+import io.hoon.realworld.security.AuthUser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -41,32 +40,39 @@ class ArticleControllerTestWithSecurity extends IntegrationTestSupport {
     @Autowired
     private ArticleRepository articleRepository;
 
-    private UserSingleResponse response = null;
+    private String token;
 
-    private static long myId = 0l;
+    private AuthUser authUser;
 
     @BeforeEach
     void setUp() {
         //-- 유저1 회원가입
-        UserSignUpServiceRequest userSignUpServiceRequest1 = UserSignUpServiceRequest.builder()
-                                                                                     .email("hoon@email.com")
-                                                                                     .username("hoon")
-                                                                                     .password("1234")
-                                                                                     .build();
+        String email = "hoon@email.com";
+        String username = "hoon";
+        String password = "1234";
 
-        userService.signUp(userSignUpServiceRequest1);
+        userService.signUp(UserSignUpServiceRequest.builder()
+                                                   .email(email)
+                                                   .username(username)
+                                                   .password(password)
+                                                   .build());
 
         //-- 유저1 로그인
-        UserLoginServiceRequest loginRequest = UserLoginServiceRequest.builder()
-                                                                      .email("hoon@email.com")
-                                                                      .password("1234")
-                                                                      .build();
+        token = userService.login(UserLoginServiceRequest.builder()
+                                                         .email(email)
+                                                         .password(password)
+                                                         .build())
+                           .getToken();
 
-        response = userService.login(loginRequest);
-
-        //-- id 조회
-        Optional<User> user = userService.findByEmail(response.getEmail());
-        myId = user.get().getId();
+        //-- user 조회
+        User user = userService.findByEmail(email).get();
+        authUser = AuthUser.builder()
+                           .id(user.getId())
+                           .email(user.getEmail())
+                           .username(user.getUsername())
+                           .bio(user.getBio())
+                           .image(user.getImage())
+                           .build();
     }
 
     @Test
@@ -83,7 +89,7 @@ class ArticleControllerTestWithSecurity extends IntegrationTestSupport {
 
         // When // Then
         mockMvc.perform(post("/api/articles")
-                       .header("Authorization", "Token " + response.getToken())
+                       .header("Authorization", "Token " + token)
                        .contentType(MediaType.APPLICATION_JSON)
                        .content(objectMapper.writeValueAsString(request)))
                .andDo(print())
@@ -110,7 +116,7 @@ class ArticleControllerTestWithSecurity extends IntegrationTestSupport {
 
         // When // Then
         mockMvc.perform(post("/api/articles")
-                       .header("Authorization", "Token " + response.getToken())
+                       .header("Authorization", "Token " + token)
                        .contentType(MediaType.APPLICATION_JSON)
                        .content(objectMapper.writeValueAsString(request)))
                .andDo(print())
@@ -130,7 +136,7 @@ class ArticleControllerTestWithSecurity extends IntegrationTestSupport {
 
         // When // Then
         mockMvc.perform(post("/api/articles")
-                       .header("Authorization", "Token " + response.getToken())
+                       .header("Authorization", "Token " + token)
                        .contentType(MediaType.APPLICATION_JSON)
                        .content(objectMapper.writeValueAsString(request)))
                .andDo(print())
@@ -150,7 +156,7 @@ class ArticleControllerTestWithSecurity extends IntegrationTestSupport {
 
         // When // Then
         mockMvc.perform(post("/api/articles")
-                       .header("Authorization", "Token " + response.getToken())
+                       .header("Authorization", "Token " + token)
                        .contentType(MediaType.APPLICATION_JSON)
                        .content(objectMapper.writeValueAsString(request)))
                .andDo(print())
@@ -169,7 +175,7 @@ class ArticleControllerTestWithSecurity extends IntegrationTestSupport {
                                                                         .body("내용")
                                                                         .tagList(List.of("tag1", "tag2"))
                                                                         .build();
-        articleService.createArticle(myId, articleCreateRequest.toServiceRequest());
+        articleService.createArticle(authUser, articleCreateRequest.toServiceRequest());
 
         // -- 아티클 변경
         ArticleUpdateRequest articleUpdateRequest = ArticleUpdateRequest.builder()
@@ -180,7 +186,7 @@ class ArticleControllerTestWithSecurity extends IntegrationTestSupport {
 
         // When // Then
         mockMvc.perform(put("/api/articles/제목")
-                       .header("Authorization", "Token " + response.getToken())
+                       .header("Authorization", "Token " + token)
                        .contentType(MediaType.APPLICATION_JSON)
                        .content(objectMapper.writeValueAsString(articleUpdateRequest)))
                .andDo(print())
@@ -203,14 +209,14 @@ class ArticleControllerTestWithSecurity extends IntegrationTestSupport {
                                                                         .body("내용")
                                                                         .tagList(List.of("tag1", "tag2"))
                                                                         .build();
-        articleService.createArticle(myId, articleCreateRequest.toServiceRequest());
+        articleService.createArticle(authUser, articleCreateRequest.toServiceRequest());
 
         // When // Then
-    	mockMvc.perform(delete("/api/articles/아티클-제목")
-                .header("Authorization", "Token " + response.getToken())
-                .contentType(MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isOk());
+        mockMvc.perform(delete("/api/articles/아티클-제목")
+                       .header("Authorization", "Token " + token)
+                       .contentType(MediaType.APPLICATION_JSON))
+               .andDo(print())
+               .andExpect(status().isOk());
 
         assertThat(articleRepository.findBySlug("아티클-제목")).isEmpty();
     }

@@ -5,13 +5,13 @@ import io.hoon.realworld.api.service.article.request.ArticleUpdateServiceRequest
 import io.hoon.realworld.api.service.article.response.ArticleSingleResponse;
 import io.hoon.realworld.api.service.profile.ProfileService;
 import io.hoon.realworld.api.service.profile.response.ProfileSingleResponse;
-import io.hoon.realworld.api.service.user.UserService;
 import io.hoon.realworld.domain.article.Article;
 import io.hoon.realworld.domain.article.ArticleRepository;
 import io.hoon.realworld.domain.article.favorite.Favorite;
 import io.hoon.realworld.domain.article.favorite.FavoriteRepository;
 import io.hoon.realworld.domain.user.User;
 import io.hoon.realworld.exception.Error;
+import io.hoon.realworld.security.AuthUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,15 +24,12 @@ import java.util.List;
 public class ArticleService {
 
     private final ArticleRepository articleRepository;
-    private final UserService userService;
     private final FavoriteRepository favoriteRepository;
     private final ProfileService profileService;
 
     @Transactional
-    public ArticleSingleResponse createArticle(Long authorId, ArticleCreateServiceRequest request) {
-        User author = userService.findById(authorId)
-                                 .orElseThrow(() -> new IllegalArgumentException(Error.USER_NOT_FOUND.getMessage()));
-
+    public ArticleSingleResponse createArticle(AuthUser user, ArticleCreateServiceRequest request) {
+        User author = user.toEntity();
         Article article = request.toEntity();
         article.setAuthor(author);
         article = articleRepository.save(article);
@@ -41,8 +38,8 @@ public class ArticleService {
     }
 
     @Transactional
-    public ArticleSingleResponse updateArticle(long authorId, String slug, ArticleUpdateServiceRequest request) {
-        Article article = findArticleBySlugAndValidateAuthor(authorId, slug);
+    public ArticleSingleResponse updateArticle(AuthUser user, String slug, ArticleUpdateServiceRequest request) {
+        Article article = findArticleBySlugAndValidateAuthor(user.getId(), slug);
 
         request.getTitle()
                .ifPresent(article::updateTitle);
@@ -56,8 +53,8 @@ public class ArticleService {
     }
 
     @Transactional
-    public void deleteArticle(Long authorId, String slug) {
-        findArticleBySlugAndValidateAuthor(authorId, slug);
+    public void deleteArticle(AuthUser user, String slug) {
+        findArticleBySlugAndValidateAuthor(user.getId(), slug);
 
         int result = articleRepository.deleteBySlug(slug);
         if (result == 0) {
@@ -79,19 +76,16 @@ public class ArticleService {
     }
 
     @Transactional
-    public ArticleSingleResponse favoriteArticle(Long userId, String slug) {
+    public ArticleSingleResponse favoriteArticle(AuthUser user, String slug) {
         Article article = articleRepository.findBySlug(slug)
                                            .orElseThrow(() -> new IllegalArgumentException(Error.ARTICLE_NOT_FOUND.getMessage()));
-
-        User user = userService.findById(userId)
-                               .orElseThrow(() -> new IllegalArgumentException(Error.USER_NOT_FOUND.getMessage()));
 
         favoriteRepository.findByArticleIdAndUserId(article.getId(), user.getId())
                           .ifPresent(favorite -> {
                               throw new IllegalStateException(Error.ALREADY_FAVORITED.getMessage());
                           });
 
-        Favorite favorite = favoriteRepository.save(Favorite.create(article, user));
+        Favorite favorite = favoriteRepository.save(Favorite.create(article, user.toEntity()));
         article.addFavorite(favorite);
 
         ProfileSingleResponse profile = profileService.get(user.getId(), article.getAuthor()
@@ -102,23 +96,21 @@ public class ArticleService {
         boolean favorited = favoriteList.stream()
                                         .anyMatch(f -> f.getUser()
                                                         .getId()
-                                                        .equals(userId));
+                                                        .equals(user.getId()));
 
         return ArticleSingleResponse.of(article, profile.isFollowing(), favorited, favoritesCount);
     }
 
     @Transactional
-    public ArticleSingleResponse unfavoriteArticle(Long userId, String slug) {
+    public ArticleSingleResponse unfavoriteArticle(AuthUser user, String slug) {
         Article article = articleRepository.findBySlug(slug)
                                            .orElseThrow(() -> new IllegalArgumentException(Error.ARTICLE_NOT_FOUND.getMessage()));
 
-        User user = userService.findById(userId)
-                               .orElseThrow(() -> new IllegalArgumentException(Error.USER_NOT_FOUND.getMessage()));
-
         Favorite favorite = favoriteRepository.findByArticleIdAndUserId(article.getId(), user.getId())
-                                               .orElseThrow(() -> new IllegalArgumentException(Error.NOT_FAVORITED.getMessage()));
+                                              .orElseThrow(() -> new IllegalArgumentException(Error.NOT_FAVORITED.getMessage()));
 
-        article.getFavoriteList().remove(favorite);
+        article.getFavoriteList()
+               .remove(favorite);
 
         ProfileSingleResponse profile = profileService.get(user.getId(), article.getAuthor()
                                                                                 .getUsername());
