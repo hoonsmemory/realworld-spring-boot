@@ -93,10 +93,19 @@ public class Article extends BaseEntity {
         this.author = author;
     }
 
-    public void addFavorite(Favorite favorite) {
+    public void favorite(Favorite favorite) {
         this.favoriteList.add(favorite);
         if (favorite.getArticle() != this) {
             favorite.setArticle(this);
         }
     }
+
+    public void unfavorite(Favorite favorite) {
+        this.favoriteList.remove(favorite);
+        if (favorite.getArticle() == this) {
+            favorite.setArticle(null);
+        }
+    }
+
+
 }

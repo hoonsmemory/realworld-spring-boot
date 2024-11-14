@@ -48,8 +48,9 @@ public class ArticleService {
         request.getBody()
                .ifPresent(article::updateBody);
 
-        return ArticleSingleResponse.of(article, false, false, article.getFavoriteList()
-                                                                      .size());
+        article = articleRepository.save(article);
+
+        return ArticleSingleResponse.of(article, false, false, article.getFavoriteList().size());
     }
 
     @Transactional
@@ -66,8 +67,7 @@ public class ArticleService {
         Article article = articleRepository.findBySlug(slug)
                                            .orElseThrow(() -> new IllegalArgumentException(Error.ARTICLE_NOT_FOUND.getMessage()));
 
-        Long getAuthorId = article.getAuthor()
-                                  .getId();
+        Long getAuthorId = article.getAuthor().getId();
         if (!getAuthorId.equals(authorId)) {
             throw new IllegalArgumentException(Error.INVALID_TOKEN.getMessage());
         }
@@ -86,10 +86,9 @@ public class ArticleService {
                           });
 
         Favorite favorite = favoriteRepository.save(Favorite.create(article, user.toEntity()));
-        article.addFavorite(favorite);
+        article.favorite(favorite);
 
-        ProfileSingleResponse profile = profileService.get(user.getId(), article.getAuthor()
-                                                                                .getUsername());
+        ProfileSingleResponse profile = profileService.get(user.getId(), article.getAuthor().getUsername());
 
         List<Favorite> favoriteList = article.getFavoriteList();
         int favoritesCount = favoriteList.size();
@@ -109,15 +108,15 @@ public class ArticleService {
         Favorite favorite = favoriteRepository.findByArticleIdAndUserId(article.getId(), user.getId())
                                               .orElseThrow(() -> new IllegalArgumentException(Error.NOT_FAVORITED.getMessage()));
 
-        article.getFavoriteList()
-               .remove(favorite);
+        article.unfavorite(favorite);
 
-        ProfileSingleResponse profile = profileService.get(user.getId(), article.getAuthor()
-                                                                                .getUsername());
+        ProfileSingleResponse profile = profileService.get(user.getId(), article.getAuthor().getUsername());
 
         List<Favorite> favoriteList = article.getFavoriteList();
         int favoritesCount = favoriteList.size();
 
         return ArticleSingleResponse.of(article, profile.isFollowing(), false, favoritesCount);
     }
+
+
 }
