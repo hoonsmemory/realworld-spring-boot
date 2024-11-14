@@ -1,6 +1,7 @@
 package io.hoon.realworld.domain.article;
 
 import io.hoon.realworld.domain.BaseEntity;
+import io.hoon.realworld.domain.article.favorite.Favorite;
 import io.hoon.realworld.domain.article.tag.Tag;
 import io.hoon.realworld.domain.user.User;
 import jakarta.persistence.*;
@@ -41,6 +42,9 @@ public class Article extends BaseEntity {
     @JoinColumn(name = "author_id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
     private User author;
+
+    @OneToMany(mappedBy = "article", cascade = CascadeType.ALL)
+    private List<Favorite> favoriteList = new ArrayList<>();
 
     public static Article create(String title, String description, String body, List<String> tagList) {
         Article article = new Article();
@@ -85,7 +89,14 @@ public class Article extends BaseEntity {
         this.body = body;
     }
 
-    public void setAuthorId(User author) {
+    public void setAuthor(User author) {
         this.author = author;
+    }
+
+    public void addFavorite(Favorite favorite) {
+        this.favoriteList.add(favorite);
+        if (favorite.getArticle() != this) {
+            favorite.setArticle(this);
+        }
     }
 }

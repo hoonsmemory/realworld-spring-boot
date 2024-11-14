@@ -13,7 +13,8 @@ public enum Error {
     ALREADY_FOLLOWING_USER("Already following the user"),
     ARTICLE_NOT_FOUND("No aricle exists with the provided slug."),
     FAILED_TO_DELETE("Failed to delete the article."),
-    INVALID_TOKEN("Invalid token: You are not authorized to perform this action.");
+    INVALID_TOKEN("Invalid token: You are not authorized to perform this action."),
+    ALREADY_FAVORITED("Already favorited the article.");
 
 
     private final String message;

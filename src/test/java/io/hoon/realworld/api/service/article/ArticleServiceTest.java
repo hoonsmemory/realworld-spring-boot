@@ -11,6 +11,7 @@ import io.hoon.realworld.api.service.user.response.UserSingleResponse;
 import io.hoon.realworld.domain.article.Article;
 import io.hoon.realworld.domain.article.ArticleRepository;
 import io.hoon.realworld.domain.user.User;
+import io.hoon.realworld.exception.Error;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,32 +35,27 @@ class ArticleServiceTest extends IntegrationTestSupport {
     private UserService userService;
 
     private UserSingleResponse response = null;
-
     private static long authorId = 0l;
 
     @BeforeEach
     void setUp() {
         //-- 유저1 회원가입
-        UserSignUpServiceRequest userSignUpServiceRequest1 = UserSignUpServiceRequest.builder()
-                                                                                     .email("hoon@email.com")
-                                                                                     .username("hoon")
-                                                                                     .password("1234")
-                                                                                     .build();
-
-        userService.signUp(userSignUpServiceRequest1);
+        userService.signUp(UserSignUpServiceRequest.builder()
+                                                   .email("hoon@email.com")
+                                                   .username("hoon")
+                                                   .password("1234")
+                                                   .build());
 
         //-- 유저1 로그인
-        UserLoginServiceRequest loginRequest = UserLoginServiceRequest.builder()
-                                                                      .email("hoon@email.com")
-                                                                      .password("1234")
-                                                                      .build();
-
-        response = userService.login(loginRequest);
+        response = userService.login(UserLoginServiceRequest.builder()
+                                                            .email("hoon@email.com")
+                                                            .password("1234")
+                                                            .build());
 
         //-- id 조회
-        Optional<User> user = userService.findByEmail(response.getEmail());
-        authorId = user.get()
-                       .getId();
+        authorId = userService.findByEmail(response.getEmail())
+                              .get()
+                              .getId();
     }
 
     @Test
@@ -125,23 +121,50 @@ class ArticleServiceTest extends IntegrationTestSupport {
     void deleteArticle() throws Exception {
         // Given
         // -- 아티클 생성
-        articleService.createArticle(authorId, ArticleCreateServiceRequest.builder()
-                                                                          .title("아티클 제목")
-                                                                          .description("설명")
-                                                                          .body("내용")
-                                                                          .tagList(List.of("tag1", "tag2"))
-                                                                          .build());
-
-        // -- 아티클 삭제
-        String slug = "아티클-제목";
+        ArticleSingleResponse article = articleService.createArticle(authorId, ArticleCreateServiceRequest.builder()
+                                                                                                          .title("아티클 제목")
+                                                                                                          .description("설명")
+                                                                                                          .body("내용")
+                                                                                                          .tagList(List.of("tag1", "tag2"))
+                                                                                                          .build());
 
         // When
-        articleService.deleteArticle(authorId, slug);
+        articleService.deleteArticle(authorId, article.getSlug());
 
         // Then
-        articleRepository.findBySlug(slug)
-                         .ifPresent(article -> {
+        articleRepository.findBySlug(article.getSlug())
+                         .ifPresent(a -> {
                              throw new IllegalStateException("The article was not deleted.");
                          });
+    }
+
+    @Test
+    @DisplayName("어느 아티클을 즐겨찾기한다.")
+    void favoriteArticle() throws Exception {
+        // Given
+        // -- 아티클 생성
+        ArticleSingleResponse article = articleService.createArticle(authorId, ArticleCreateServiceRequest.builder()
+                                                                                                          .title("아티클 제목")
+                                                                                                          .description("설명")
+                                                                                                          .body("내용")
+                                                                                                          .tagList(List.of("tag1", "tag2"))
+                                                                                                          .build());
+
+        UserSingleResponse userSingleResponse = userService.signUp(UserSignUpServiceRequest.builder()
+                                                                                           .email("emily@email.com")
+                                                                                           .username("emily")
+                                                                                           .password("1234")
+                                                                                           .build());
+
+        User user = userService.findByEmail(userSingleResponse.getEmail())
+                               .orElseThrow(() -> new IllegalArgumentException(Error.USER_NOT_FOUND.getMessage()));
+
+
+        // When
+        ArticleSingleResponse response = articleService.favoriteArticle(user.getId(), article.getSlug());
+
+        // Then
+        assertThat(response).extracting("favorited", "favoritesCount")
+                            .contains(true, 1);
     }
 }
