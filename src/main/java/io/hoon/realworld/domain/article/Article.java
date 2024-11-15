@@ -2,10 +2,13 @@ package io.hoon.realworld.domain.article;
 
 import io.hoon.realworld.domain.BaseEntity;
 import io.hoon.realworld.domain.article.favorite.Favorite;
+import io.hoon.realworld.domain.article.tag.ArticleTag;
 import io.hoon.realworld.domain.article.tag.Tag;
 import io.hoon.realworld.domain.user.User;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -37,7 +40,7 @@ public class Article extends BaseEntity {
     private String body;
 
     @OneToMany(mappedBy = "article", cascade = CascadeType.ALL)
-    private List<Tag> tagList = new ArrayList<>();
+    private List<ArticleTag> tagList = new ArrayList<>();
 
     @JoinColumn(name = "author_id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
@@ -46,34 +49,26 @@ public class Article extends BaseEntity {
     @OneToMany(mappedBy = "article", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Favorite> favoriteList = new ArrayList<>();
 
-    public static Article create(String title, String description, String body, List<String> tagList) {
-        Article article = new Article();
-        article.title = title;
-        article.description = description;
-        article.body = body;
-        article.slug = title.replaceAll(" ", "-");
-
-        if (tagList == null || tagList.size() == 0) {
-            return article;
-        }
-
-        for (String tag : tagList) {
-            Tag newTag = Tag.builder()
-                            .name(tag)
-                            .article(article)
-                            .build();
-
-            article.addTag(newTag);
-        }
-
-        return article;
+    @Builder
+    private Article(User author, String title, String description, String body) {
+        this.author = author;
+        this.slug = title.replaceAll(" ", "-");
+        this.title = title;
+        this.description = description;
+        this.body = body;
     }
 
-    public void addTag(Tag tag) {
-        this.tagList.add(tag);
-        if (tag.getArticle() != this) {
-            tag.addArticle(this);
+    public void addTag(@NotNull Tag tag) {
+        ArticleTag articleTag = ArticleTag.builder()
+                                          .article(this)
+                                          .tag(tag)
+                                          .build();
+
+        if (this.tagList.stream().anyMatch(articleTag::equals)) {
+            return;
         }
+
+        this.tagList.add(articleTag);
     }
 
     public void updateTitle(String title) {
@@ -89,7 +84,7 @@ public class Article extends BaseEntity {
         this.body = body;
     }
 
-    public void setAuthor(User author) {
+    public void addAuthor(@NotNull User author) {
         this.author = author;
     }
 

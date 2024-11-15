@@ -3,11 +3,10 @@ package io.hoon.realworld.api.controller.article;
 import io.hoon.realworld.ControllerTestSupport;
 import io.hoon.realworld.api.service.article.response.ArticleSingleResponse;
 import io.hoon.realworld.domain.article.Article;
+import io.hoon.realworld.domain.article.tag.Tag;
 import io.hoon.realworld.domain.user.User;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -22,8 +21,15 @@ class ArticleControllerTest extends ControllerTestSupport {
     @DisplayName("하나의 아티클을 조회한다.")
     void getArticle() throws Exception {
         // Given
-        Article article = Article.create("article subject", "설명", "내용", List.of("tag1", "tag2"));
-        article.setAuthor(User.create("hoon@email.com", "hoon", "password"));
+        Article article = Article.builder()
+                                 .title("article subject")
+                                 .description("설명")
+                                 .body("내용")
+                                 .build();
+
+        article.addAuthor(User.create("hoon@email.com", "hoon", "password"));
+        article.addTag(Tag.builder().name("tag1").build());
+        article.addTag(Tag.builder().name("tag2").build());
         when(articleService.getArticle(any(), any())).thenReturn(ArticleSingleResponse.of(article, false, false, 0));
 
         // When // Then

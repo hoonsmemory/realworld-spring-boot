@@ -1,22 +1,25 @@
 package io.hoon.realworld.api.service.article;
 
 import io.hoon.realworld.api.service.article.request.ArticleCreateServiceRequest;
+import io.hoon.realworld.api.service.article.request.ArticleGetArticlesServiceRequest;
 import io.hoon.realworld.api.service.article.request.ArticleUpdateServiceRequest;
 import io.hoon.realworld.api.service.article.response.ArticleSingleResponse;
 import io.hoon.realworld.api.service.profile.ProfileService;
-import io.hoon.realworld.api.service.profile.response.ProfileSingleResponse;
 import io.hoon.realworld.domain.article.Article;
 import io.hoon.realworld.domain.article.ArticleRepository;
 import io.hoon.realworld.domain.article.favorite.Favorite;
 import io.hoon.realworld.domain.article.favorite.FavoriteRepository;
-import io.hoon.realworld.domain.user.User;
+import io.hoon.realworld.domain.article.tag.Tag;
+import io.hoon.realworld.domain.article.tag.TagRepository;
 import io.hoon.realworld.exception.Error;
 import io.hoon.realworld.security.AuthUser;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -24,16 +27,23 @@ import java.util.List;
 public class ArticleService {
 
     private final ArticleRepository articleRepository;
+    private final TagRepository tagRepository;
     private final FavoriteRepository favoriteRepository;
     private final ProfileService profileService;
 
     @Transactional
     public ArticleSingleResponse createArticle(AuthUser user, ArticleCreateServiceRequest request) {
-        User author = user.toEntity();
-        Article article = request.toEntity();
-        article.setAuthor(author);
-        article = articleRepository.save(article);
+        Article article = request.toArticleEntity();
+        article.addAuthor(user.toEntity());
+        List<Tag> tagList = request.toTagEntityList();
 
+        for (Tag requestTag : tagList) {
+            Optional<Tag> tag = tagRepository.findByName(requestTag.getName());
+            Tag savedTag = tag.orElseGet(() -> tagRepository.save(requestTag));
+            article.addTag(savedTag);
+        }
+
+        article = articleRepository.save(article);
         return ArticleSingleResponse.of(article, false, false, 0);
     }
 
@@ -134,5 +144,17 @@ public class ArticleService {
                                                 .equals(user.getId()));
 
         return new AddtionalInfo(isFollowing, favorited, favoritesCount);
+    }
+
+    public List<ArticleSingleResponse> getArticles(AuthUser user, ArticleGetArticlesServiceRequest request) {
+        String tag = request.getTag();
+        String author = request.getAuthor();
+        String favorited = request.getFavorited();
+        Pageable pageable = request.getPageable();
+
+        articleRepository.findByArguments(tag, author, favorited, pageable)
+                         .orElseThrow(() -> new IllegalArgumentException(Error.ARTICLE_NOT_FOUND.getMessage()));
+
+        return null;
     }
 }

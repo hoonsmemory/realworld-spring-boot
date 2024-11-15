@@ -50,7 +50,7 @@ public class ArticleSingleResponse {
         List<String> tagList = Optional.ofNullable(article.getTagList())
                                        .orElse(Collections.emptyList())
                                        .stream()
-                                       .map(Tag::getName)
+                                       .map(tag -> tag.getTag().getName())
                                        .toList();
 
         return ArticleSingleResponse.builder()

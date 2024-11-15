@@ -1,6 +1,7 @@
 package io.hoon.realworld.api.service.article.request;
 
 import io.hoon.realworld.domain.article.Article;
+import io.hoon.realworld.domain.article.tag.Tag;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -22,7 +23,19 @@ public class ArticleCreateServiceRequest {
         this.tagList = tagList;
     }
 
-    public Article toEntity() {
-        return Article.create(title, description, body, tagList);
+    public Article toArticleEntity() {
+        return Article.builder()
+                      .title(title)
+                      .description(description)
+                      .body(body)
+                      .build();
+    }
+
+    public List<Tag> toTagEntityList() {
+        return tagList.stream()
+                      .map(name -> Tag.builder()
+                                     .name(name)
+                                     .build())
+                      .toList();
     }
 }
