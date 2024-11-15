@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -91,7 +92,7 @@ class ArticleControllerTestWithSecurity extends IntegrationTestSupport {
         mockMvc.perform(post("/api/articles")
                        .header("Authorization", "Token " + token)
                        .contentType(MediaType.APPLICATION_JSON)
-                       .content(objectMapper.writeValueAsString(request)))
+                       .content(objectMapper.writeValueAsString(Map.of("article", request))))
                .andDo(print())
                .andExpect(status().isOk())
                .andExpect(jsonPath("$.article.title").value("제목"))
@@ -118,7 +119,7 @@ class ArticleControllerTestWithSecurity extends IntegrationTestSupport {
         mockMvc.perform(post("/api/articles")
                        .header("Authorization", "Token " + token)
                        .contentType(MediaType.APPLICATION_JSON)
-                       .content(objectMapper.writeValueAsString(request)))
+                       .content(objectMapper.writeValueAsString(Map.of("article", request))))
                .andDo(print())
                .andExpect(status().isBadRequest());
     }
@@ -138,7 +139,7 @@ class ArticleControllerTestWithSecurity extends IntegrationTestSupport {
         mockMvc.perform(post("/api/articles")
                        .header("Authorization", "Token " + token)
                        .contentType(MediaType.APPLICATION_JSON)
-                       .content(objectMapper.writeValueAsString(request)))
+                       .content(objectMapper.writeValueAsString(Map.of("article", request))))
                .andDo(print())
                .andExpect(status().isBadRequest());
     }
@@ -158,7 +159,7 @@ class ArticleControllerTestWithSecurity extends IntegrationTestSupport {
         mockMvc.perform(post("/api/articles")
                        .header("Authorization", "Token " + token)
                        .contentType(MediaType.APPLICATION_JSON)
-                       .content(objectMapper.writeValueAsString(request)))
+                       .content(objectMapper.writeValueAsString(Map.of("article", request))))
                .andDo(print())
                .andExpect(status().isBadRequest());
     }
@@ -188,7 +189,7 @@ class ArticleControllerTestWithSecurity extends IntegrationTestSupport {
         mockMvc.perform(put("/api/articles/제목")
                        .header("Authorization", "Token " + token)
                        .contentType(MediaType.APPLICATION_JSON)
-                       .content(objectMapper.writeValueAsString(articleUpdateRequest)))
+                       .content(objectMapper.writeValueAsString(Map.of("article", articleUpdateRequest))))
                .andDo(print())
                .andExpect(status().isOk())
                .andExpect(jsonPath("$.article.title").value("제목 변경"))
@@ -246,6 +247,7 @@ class ArticleControllerTestWithSecurity extends IntegrationTestSupport {
 
     @Test
     @DisplayName("즐겨찾기한 아티클을 취소한다.")
+    @Transactional
     void unfavorite() throws Exception {
         // Given
         // -- 아티클 생성

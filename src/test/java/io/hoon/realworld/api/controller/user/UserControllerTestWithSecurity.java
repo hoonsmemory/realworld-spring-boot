@@ -14,6 +14,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
+
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -88,7 +90,7 @@ public class UserControllerTestWithSecurity extends IntegrationTestSupport {
         mockMvc.perform(put("/api/user")
                        .header("Authorization", "Token " + response.getToken())
                        .contentType(MediaType.APPLICATION_JSON)
-                       .content(objectMapper.writeValueAsString(request))
+                       .content(objectMapper.writeValueAsString(Map.of("user", request)))
                )
                .andDo(print())
                .andExpect(status().isOk())

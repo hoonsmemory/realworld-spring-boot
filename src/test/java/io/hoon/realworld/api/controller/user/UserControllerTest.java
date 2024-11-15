@@ -8,6 +8,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
+import java.util.Map;
+
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
@@ -44,7 +46,7 @@ class UserControllerTest extends ControllerTestSupport {
         mockMvc.perform(
                        post("/api/users")
                                .contentType(MediaType.APPLICATION_JSON)
-                               .content(objectMapper.writeValueAsString(request))
+                               .content(objectMapper.writeValueAsString(Map.of("user", request)))
                )
                .andDo(print())
                .andExpect(status().isOk())
@@ -68,7 +70,7 @@ class UserControllerTest extends ControllerTestSupport {
         mockMvc.perform(
                        post("/api/users")
                                .contentType(MediaType.APPLICATION_JSON)
-                               .content(objectMapper.writeValueAsString(request))
+                               .content(objectMapper.writeValueAsString(Map.of("user", request)))
                )
                .andDo(print())
                .andExpect(status().isBadRequest());
@@ -106,7 +108,7 @@ class UserControllerTest extends ControllerTestSupport {
         mockMvc.perform(
                        post("/api/users")
                                .contentType(MediaType.APPLICATION_JSON)
-                               .content(objectMapper.writeValueAsString(request))
+                               .content(objectMapper.writeValueAsString(Map.of("user", request)))
                )
                .andDo(print())
                .andExpect(status().isBadRequest());
@@ -131,7 +133,7 @@ class UserControllerTest extends ControllerTestSupport {
         mockMvc.perform(
                        post("/api/users/login")
                                .contentType(MediaType.APPLICATION_JSON)
-                               .content(objectMapper.writeValueAsString(request))
+                               .content(objectMapper.writeValueAsString(Map.of("user", request)))
                )
                .andDo(print())
                .andExpect(status().isOk())
@@ -154,7 +156,7 @@ class UserControllerTest extends ControllerTestSupport {
         mockMvc.perform(
                        post("/api/users/login")
                                .contentType(MediaType.APPLICATION_JSON)
-                               .content(objectMapper.writeValueAsString(request))
+                               .content(objectMapper.writeValueAsString(Map.of("user", request)))
                )
                .andDo(print())
                .andExpect(status().isBadRequest());
@@ -172,7 +174,7 @@ class UserControllerTest extends ControllerTestSupport {
         mockMvc.perform(
                        post("/api/users/login")
                                .contentType(MediaType.APPLICATION_JSON)
-                               .content(objectMapper.writeValueAsString(request))
+                               .content(objectMapper.writeValueAsString(Map.of("user", request)))
                )
                .andDo(print())
                .andExpect(status().isBadRequest());

@@ -218,6 +218,7 @@ class ArticleServiceTest extends IntegrationTestSupport {
 
     @Test
     @DisplayName("하나의 아티클을 조회한다.")
+    @Transactional
     void getArticle() throws Exception {
         // Given
         // -- 아티클 생성
