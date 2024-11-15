@@ -1,8 +1,7 @@
 package io.hoon.realworld.api.controller.profile;
 
+import io.hoon.realworld.api.controller.profile.response.ProfileSingleResponse;
 import io.hoon.realworld.api.service.profile.ProfileService;
-import io.hoon.realworld.api.service.profile.response.ProfileSingleResponse;
-import io.hoon.realworld.domain.user.User;
 import io.hoon.realworld.security.AuthUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -15,16 +14,16 @@ public class ProfileController {
 
     @GetMapping("/api/profiles/{username}")
     public ProfileSingleResponse get(AuthUser user, @PathVariable String username) {
-        return profileService.get(user.getId(), username);
+        return new ProfileSingleResponse(profileService.get(user.getId(), username));
     }
 
     @PostMapping("/api/profiles/{username}/follow")
     public ProfileSingleResponse follow(AuthUser user, @PathVariable String username) {
-        return profileService.follow(user.getId(), username);
+        return new ProfileSingleResponse(profileService.follow(user.getId(), username));
     }
 
     @DeleteMapping("/api/profiles/{username}/follow")
     public ProfileSingleResponse unfollow(AuthUser user, @PathVariable String username) {
-        return profileService.unfollow(user.getId(), username);
+        return new ProfileSingleResponse(profileService.unfollow(user.getId(), username));
     }
 }

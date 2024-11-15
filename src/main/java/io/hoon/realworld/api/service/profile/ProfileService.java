@@ -1,10 +1,10 @@
 package io.hoon.realworld.api.service.profile;
 
-import io.hoon.realworld.api.service.profile.response.ProfileSingleResponse;
+import io.hoon.realworld.api.service.profile.response.ProfileServiceResponse;
 import io.hoon.realworld.api.service.user.UserService;
+import io.hoon.realworld.domain.user.User;
 import io.hoon.realworld.domain.user.follow.Follow;
 import io.hoon.realworld.domain.user.follow.FollowRepository;
-import io.hoon.realworld.domain.user.User;
 import io.hoon.realworld.exception.Error;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,18 +20,18 @@ public class ProfileService {
     private final UserService userService;
     private final FollowRepository followRepository;
 
-    public ProfileSingleResponse get(long myId, String targetUsername) {
+    public ProfileServiceResponse get(long myId, String targetUsername) {
         User target = userService.findByUsername(targetUsername)
                                  .orElseThrow(() -> new NoSuchElementException(targetUsername));
 
         boolean isFollow = followRepository.findByFollowerIdAndFolloweeId(myId, target.getId())
                                            .isPresent();
 
-        return ProfileSingleResponse.of(target, isFollow);
+        return ProfileServiceResponse.of(target, isFollow);
     }
 
     @Transactional
-    public ProfileSingleResponse follow(long myId, String targetUsername) {
+    public ProfileServiceResponse follow(long myId, String targetUsername) {
         User target = userService.findByUsername(targetUsername)
                                  .orElseThrow(() ->
                                          new NoSuchElementException(targetUsername)
@@ -51,11 +51,11 @@ public class ProfileService {
 
         followRepository.save(newFollow);
 
-        return ProfileSingleResponse.of(target, true);
+        return ProfileServiceResponse.of(target, true);
     }
 
     @Transactional
-    public ProfileSingleResponse unfollow(long myId, String targetUsername) {
+    public ProfileServiceResponse unfollow(long myId, String targetUsername) {
         User target = userService.findByUsername(targetUsername)
                                  .orElseThrow(() ->
                                          new NoSuchElementException(targetUsername)
@@ -67,6 +67,6 @@ public class ProfileService {
 
         followRepository.delete(follow);
 
-        return ProfileSingleResponse.of(target, false);
+        return ProfileServiceResponse.of(target, false);
     }
 }

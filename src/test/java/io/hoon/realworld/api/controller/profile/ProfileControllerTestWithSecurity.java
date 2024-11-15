@@ -2,7 +2,7 @@ package io.hoon.realworld.api.controller.profile;
 
 import io.hoon.realworld.IntegrationTestSupport;
 import io.hoon.realworld.api.service.profile.ProfileService;
-import io.hoon.realworld.api.service.profile.response.ProfileSingleResponse;
+import io.hoon.realworld.api.service.profile.response.ProfileServiceResponse;
 import io.hoon.realworld.api.service.user.UserService;
 import io.hoon.realworld.api.service.user.request.UserLoginServiceRequest;
 import io.hoon.realworld.api.service.user.request.UserSignUpServiceRequest;
@@ -116,10 +116,10 @@ class ProfileControllerTestWithSecurity extends IntegrationTestSupport {
     @DisplayName("다른 회원을 언팔로우한다.")
     void unfollow() throws Exception {
         // Given
-        ProfileSingleResponse profileSingleResponse = profileService.follow(myId, "hoon");
+        ProfileServiceResponse profileServiceResponse = profileService.follow(myId, "hoon");
 
         // When // Then
-        assertThat(profileSingleResponse.isFollowing()).isTrue();
+        assertThat(profileServiceResponse.isFollowing()).isTrue();
 
         mockMvc.perform(delete("/api/profiles/hoon/follow")
                        .header("Authorization", "Token " + response.getToken()))

@@ -2,7 +2,7 @@ package io.hoon.realworld.api.service.article.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
-import io.hoon.realworld.api.service.profile.response.ProfileSingleResponse;
+import io.hoon.realworld.api.service.profile.response.ProfileServiceResponse;
 import io.hoon.realworld.domain.article.Article;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,11 +26,11 @@ public class ArticleServiceResponse {
     private int favoritesCount;
 
     @JsonProperty("author")
-    private ProfileSingleResponse profileSingleResponse;
+    private ProfileServiceResponse profileServiceResponse;
 
     @Builder
     private ArticleServiceResponse(String slug, String title, String description, String body, List<String> tagList,
-                                   LocalDateTime createdAt, LocalDateTime updatedAt, ProfileSingleResponse profileSingleResponse,
+                                   LocalDateTime createdAt, LocalDateTime updatedAt, ProfileServiceResponse profileServiceResponse,
                                    boolean favorited, int favoritesCount) {
         this.slug = slug;
         this.title = title;
@@ -39,7 +39,7 @@ public class ArticleServiceResponse {
         this.tagList = tagList;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
-        this.profileSingleResponse = profileSingleResponse;
+        this.profileServiceResponse = profileServiceResponse;
         this.favorited = favorited;
         this.favoritesCount = favoritesCount;
     }
@@ -61,7 +61,7 @@ public class ArticleServiceResponse {
                                      .updatedAt(article.getUpdatedAt())
                                      .favorited(isFavorite)
                                      .favoritesCount(favoritesCount)
-                                     .profileSingleResponse(ProfileSingleResponse.of(article.getAuthor(), isFollow))
+                                     .profileServiceResponse(ProfileServiceResponse.of(article.getAuthor(), isFollow))
                                      .build();
     }
 }

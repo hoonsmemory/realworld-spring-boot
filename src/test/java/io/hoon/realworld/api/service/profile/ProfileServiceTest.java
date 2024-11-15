@@ -1,7 +1,7 @@
 package io.hoon.realworld.api.service.profile;
 
 import io.hoon.realworld.IntegrationTestSupport;
-import io.hoon.realworld.api.service.profile.response.ProfileSingleResponse;
+import io.hoon.realworld.api.service.profile.response.ProfileServiceResponse;
 import io.hoon.realworld.api.service.user.UserService;
 import io.hoon.realworld.api.service.user.request.UserSignUpServiceRequest;
 import io.hoon.realworld.api.service.user.response.UserServiceResponse;
@@ -71,7 +71,7 @@ class ProfileServiceTest extends IntegrationTestSupport {
     @Transactional
     void getProfile() throws Exception {
         // When
-        ProfileSingleResponse response = profileService.get(myId, "hoon");
+        ProfileServiceResponse response = profileService.get(myId, "hoon");
 
         // Then
         assertThat(response)
@@ -84,7 +84,7 @@ class ProfileServiceTest extends IntegrationTestSupport {
     @Transactional
     void follow() throws Exception {
         // When
-        ProfileSingleResponse response = profileService.follow(myId, "hoon");
+        ProfileServiceResponse response = profileService.follow(myId, "hoon");
 
         // Then
         assertThat(response)
@@ -100,7 +100,7 @@ class ProfileServiceTest extends IntegrationTestSupport {
         profileService.follow(myId, "hoon");
 
         // When
-        ProfileSingleResponse response = profileService.unfollow(myId, "hoon");
+        ProfileServiceResponse response = profileService.unfollow(myId, "hoon");
 
         // Then
         assertThat(response)
