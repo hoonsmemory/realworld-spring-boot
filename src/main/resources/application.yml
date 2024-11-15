@@ -2,9 +2,6 @@
 spring:
   profiles:
     default: local
-  jackson:
-    serialization:
-      wrap-root-value: true
 
   datasource:
     url: jdbc:h2:mem:~/RealWorldApplication
@@ -19,6 +16,7 @@ spring:
       hibernate:
         show_sql: false
         format_sql: false
+        default_batch_fetch_size: 500
     defer-datasource-initialization: true # (2.5~) Hibernate 초기화 이후 data.sql 실행
 
 security:

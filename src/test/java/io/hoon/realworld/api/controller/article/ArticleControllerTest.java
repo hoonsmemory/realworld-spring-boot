@@ -1,7 +1,7 @@
 package io.hoon.realworld.api.controller.article;
 
 import io.hoon.realworld.ControllerTestSupport;
-import io.hoon.realworld.api.service.article.response.ArticleSingleResponse;
+import io.hoon.realworld.api.service.article.response.ArticleServiceResponse;
 import io.hoon.realworld.domain.article.Article;
 import io.hoon.realworld.domain.article.tag.Tag;
 import io.hoon.realworld.domain.user.User;
@@ -30,7 +30,7 @@ class ArticleControllerTest extends ControllerTestSupport {
         article.addAuthor(User.create("hoon@email.com", "hoon", "password"));
         article.addTag(Tag.builder().name("tag1").build());
         article.addTag(Tag.builder().name("tag2").build());
-        when(articleService.getArticle(any(), any())).thenReturn(ArticleSingleResponse.of(article, false, false, 0));
+        when(articleService.getArticle(any(), any())).thenReturn(ArticleServiceResponse.of(article, false, false, 0));
 
         // When // Then
         mockMvc.perform(get("/api/articles/{slug}", "article-subject"))

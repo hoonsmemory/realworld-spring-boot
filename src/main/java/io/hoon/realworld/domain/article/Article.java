@@ -39,7 +39,7 @@ public class Article extends BaseEntity {
     @Column(length = 1000, nullable = false)
     private String body;
 
-    @OneToMany(mappedBy = "article", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "article", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ArticleTag> tagList = new ArrayList<>();
 
     @JoinColumn(name = "author_id", nullable = false)

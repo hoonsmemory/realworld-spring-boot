@@ -3,7 +3,8 @@ package io.hoon.realworld.api.service.article;
 import io.hoon.realworld.api.service.article.request.ArticleCreateServiceRequest;
 import io.hoon.realworld.api.service.article.request.ArticleGetArticlesServiceRequest;
 import io.hoon.realworld.api.service.article.request.ArticleUpdateServiceRequest;
-import io.hoon.realworld.api.service.article.response.ArticleSingleResponse;
+import io.hoon.realworld.api.controller.article.response.ArticleMultiResponse;
+import io.hoon.realworld.api.service.article.response.ArticleServiceResponse;
 import io.hoon.realworld.api.service.profile.ProfileService;
 import io.hoon.realworld.domain.article.Article;
 import io.hoon.realworld.domain.article.ArticleRepository;
@@ -32,7 +33,7 @@ public class ArticleService {
     private final ProfileService profileService;
 
     @Transactional
-    public ArticleSingleResponse createArticle(AuthUser user, ArticleCreateServiceRequest request) {
+    public ArticleServiceResponse createArticle(AuthUser user, ArticleCreateServiceRequest request) {
         Article article = request.toArticleEntity();
         article.addAuthor(user.toEntity());
         List<Tag> tagList = request.toTagEntityList();
@@ -44,11 +45,11 @@ public class ArticleService {
         }
 
         article = articleRepository.save(article);
-        return ArticleSingleResponse.of(article, false, false, 0);
+        return ArticleServiceResponse.of(article, false, false, 0);
     }
 
     @Transactional
-    public ArticleSingleResponse updateArticle(AuthUser user, String slug, ArticleUpdateServiceRequest request) {
+    public ArticleServiceResponse updateArticle(AuthUser user, String slug, ArticleUpdateServiceRequest request) {
         Article article = findArticleBySlugAndValidateAuthor(user.getId(), slug);
 
         request.getTitle()
@@ -60,7 +61,7 @@ public class ArticleService {
 
         article = articleRepository.save(article);
 
-        return ArticleSingleResponse.of(article, false, false, article.getFavoriteList().size());
+        return ArticleServiceResponse.of(article, false, false, article.getFavoriteList().size());
     }
 
     @Transactional
@@ -85,7 +86,7 @@ public class ArticleService {
     }
 
     @Transactional
-    public ArticleSingleResponse favoriteArticle(AuthUser user, String slug) {
+    public ArticleServiceResponse favoriteArticle(AuthUser user, String slug) {
         Article article = findBySlug(slug);
 
         favoriteRepository.findByArticleIdAndUserId(article.getId(), user.getId())
@@ -97,11 +98,11 @@ public class ArticleService {
 
         AddtionalInfo addtionalInfo = getArticleAdditionalInfo(user, article);
 
-        return ArticleSingleResponse.of(article, addtionalInfo.isFollowing(), true, addtionalInfo.favoritesCount());
+        return ArticleServiceResponse.of(article, addtionalInfo.isFollowing(), true, addtionalInfo.favoritesCount());
     }
     
     @Transactional
-    public ArticleSingleResponse unfavoriteArticle(AuthUser user, String slug) {
+    public ArticleServiceResponse unfavoriteArticle(AuthUser user, String slug) {
         Article article = findBySlug(slug);
         
         article.unfavorite(favoriteRepository.findByArticleIdAndUserId(article.getId(), user.getId())
@@ -109,15 +110,15 @@ public class ArticleService {
 
         AddtionalInfo addtionalInfo = getArticleAdditionalInfo(user, article);
 
-        return ArticleSingleResponse.of(article, addtionalInfo.isFollowing(), false, addtionalInfo.favoritesCount());
+        return ArticleServiceResponse.of(article, addtionalInfo.isFollowing(), false, addtionalInfo.favoritesCount());
     }
 
-    public ArticleSingleResponse getArticle(AuthUser user, String slug) {
+    public ArticleServiceResponse getArticle(AuthUser user, String slug) {
         Article article = findBySlug(slug);
 
         AddtionalInfo addtionalInfo = getArticleAdditionalInfo(user, article);
 
-        return ArticleSingleResponse.of(article, addtionalInfo.isFollowing(), addtionalInfo.favorited(), addtionalInfo.favoritesCount());
+        return ArticleServiceResponse.of(article, addtionalInfo.isFollowing(), addtionalInfo.favorited(), addtionalInfo.favoritesCount());
     }
 
     private Article findBySlug(String slug) {
@@ -146,15 +147,22 @@ public class ArticleService {
         return new AddtionalInfo(isFollowing, favorited, favoritesCount);
     }
 
-    public List<ArticleSingleResponse> getArticles(AuthUser user, ArticleGetArticlesServiceRequest request) {
+    public List<ArticleServiceResponse> getArticles(AuthUser user, ArticleGetArticlesServiceRequest request) {
         String tag = request.getTag();
         String author = request.getAuthor();
         String favorited = request.getFavorited();
         Pageable pageable = request.getPageable();
 
-        articleRepository.findByArguments(tag, author, favorited, pageable)
-                         .orElseThrow(() -> new IllegalArgumentException(Error.ARTICLE_NOT_FOUND.getMessage()));
+        List<Article> articles = articleRepository.findByArguments(tag, author, favorited, pageable)
+                                                  .orElseThrow(() -> new IllegalArgumentException(Error.ARTICLE_NOT_FOUND.getMessage()));
 
-        return null;
+        return articles.stream()
+                       .map(article -> {
+                           AddtionalInfo addtionalInfo = getArticleAdditionalInfo(user, article);
+                           return ArticleServiceResponse.of(article,
+                                   addtionalInfo.isFollowing(),
+                                   addtionalInfo.favorited(),
+                                   addtionalInfo.favoritesCount());
+                       }).toList();
     }
 }

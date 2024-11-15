@@ -2,13 +2,10 @@ package io.hoon.realworld.api.controller.user.response;
 
 import io.hoon.realworld.api.service.user.response.UserServiceResponse;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 @Getter
 public class UserSingleResponse {
-    UserServiceResponse user;
-
-    public UserSingleResponse(UserServiceResponse user) {
-        this.user = user;
-    }
-
+    private final UserServiceResponse user;
 }

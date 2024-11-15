@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonRootName;
 import io.hoon.realworld.api.service.profile.response.ProfileSingleResponse;
 import io.hoon.realworld.domain.article.Article;
-import io.hoon.realworld.domain.article.favorite.Favorite;
-import io.hoon.realworld.domain.article.tag.Tag;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -16,7 +14,7 @@ import java.util.Optional;
 
 @Getter
 @JsonRootName("article")
-public class ArticleSingleResponse {
+public class ArticleServiceResponse {
     private String slug;
     private String title;
     private String description;
@@ -31,9 +29,9 @@ public class ArticleSingleResponse {
     private ProfileSingleResponse profileSingleResponse;
 
     @Builder
-    private ArticleSingleResponse(String slug, String title, String description, String body, List<String> tagList,
-                                  LocalDateTime createdAt, LocalDateTime updatedAt, ProfileSingleResponse profileSingleResponse,
-                                  boolean favorited, int favoritesCount) {
+    private ArticleServiceResponse(String slug, String title, String description, String body, List<String> tagList,
+                                   LocalDateTime createdAt, LocalDateTime updatedAt, ProfileSingleResponse profileSingleResponse,
+                                   boolean favorited, int favoritesCount) {
         this.slug = slug;
         this.title = title;
         this.description = description;
@@ -46,24 +44,24 @@ public class ArticleSingleResponse {
         this.favoritesCount = favoritesCount;
     }
 
-    public static ArticleSingleResponse of(Article article, boolean isFollow, boolean isFavorite, int favoritesCount) {
+    public static ArticleServiceResponse of(Article article, boolean isFollow, boolean isFavorite, int favoritesCount) {
         List<String> tagList = Optional.ofNullable(article.getTagList())
                                        .orElse(Collections.emptyList())
                                        .stream()
                                        .map(tag -> tag.getTag().getName())
                                        .toList();
 
-        return ArticleSingleResponse.builder()
-                                    .slug(article.getSlug())
-                                    .title(article.getTitle())
-                                    .description(article.getDescription())
-                                    .body(article.getBody())
-                                    .tagList(tagList)
-                                    .createdAt(article.getCreatedAt())
-                                    .updatedAt(article.getUpdatedAt())
-                                    .favorited(isFavorite)
-                                    .favoritesCount(favoritesCount)
-                                    .profileSingleResponse(ProfileSingleResponse.of(article.getAuthor(), isFollow))
-                                    .build();
+        return ArticleServiceResponse.builder()
+                                     .slug(article.getSlug())
+                                     .title(article.getTitle())
+                                     .description(article.getDescription())
+                                     .body(article.getBody())
+                                     .tagList(tagList)
+                                     .createdAt(article.getCreatedAt())
+                                     .updatedAt(article.getUpdatedAt())
+                                     .favorited(isFavorite)
+                                     .favoritesCount(favoritesCount)
+                                     .profileSingleResponse(ProfileSingleResponse.of(article.getAuthor(), isFollow))
+                                     .build();
     }
 }
