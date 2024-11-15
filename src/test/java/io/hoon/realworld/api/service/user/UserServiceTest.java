@@ -4,7 +4,7 @@ import io.hoon.realworld.IntegrationTestSupport;
 import io.hoon.realworld.api.service.user.request.UserLoginServiceRequest;
 import io.hoon.realworld.api.service.user.request.UserSignUpServiceRequest;
 import io.hoon.realworld.api.service.user.request.UserUpdateServiceRequest;
-import io.hoon.realworld.api.service.user.response.UserSingleResponse;
+import io.hoon.realworld.api.service.user.response.UserServiceResponse;
 import io.hoon.realworld.domain.user.User;
 import io.hoon.realworld.domain.user.UserRepository;
 import io.hoon.realworld.exception.Error;
@@ -47,7 +47,7 @@ class UserServiceTest extends IntegrationTestSupport {
                                                                    .build();
 
         // When
-        UserSingleResponse response = userService.signUp(request);
+        UserServiceResponse response = userService.signUp(request);
 
         // Then
         User byEmail = userRepository.findByEmail(email)
@@ -80,7 +80,7 @@ class UserServiceTest extends IntegrationTestSupport {
                                                                       .build();
 
         // When
-        UserSingleResponse response = userService.login(loginRequest);
+        UserServiceResponse response = userService.login(loginRequest);
 
         // Then
         assertThat(response)
@@ -127,7 +127,7 @@ class UserServiceTest extends IntegrationTestSupport {
                                                                    .build();
 
         // When
-        UserSingleResponse response = userService.update(authUser, updateRequest);
+        UserServiceResponse response = userService.update(authUser, updateRequest);
 
         // Then
         assertThat(response)

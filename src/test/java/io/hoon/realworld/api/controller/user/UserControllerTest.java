@@ -3,7 +3,7 @@ package io.hoon.realworld.api.controller.user;
 import io.hoon.realworld.ControllerTestSupport;
 import io.hoon.realworld.api.controller.user.request.UserLoginRequest;
 import io.hoon.realworld.api.controller.user.request.UserSignUpRequest;
-import io.hoon.realworld.api.service.user.response.UserSingleResponse;
+import io.hoon.realworld.api.service.user.response.UserServiceResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -33,12 +33,12 @@ class UserControllerTest extends ControllerTestSupport {
                                                      .password(password)
                                                      .build();
 
-        UserSingleResponse userSingleResponse = UserSingleResponse.builder()
-                                                                  .email(email)
-                                                                  .username(username)
-                                                                  .build();
+        UserServiceResponse userServiceResponse = UserServiceResponse.builder()
+                                                                     .email(email)
+                                                                     .username(username)
+                                                                     .build();
 
-        when(userService.signUp(any())).thenReturn(userSingleResponse);
+        when(userService.signUp(any())).thenReturn(userServiceResponse);
 
         // when // then
         mockMvc.perform(
@@ -121,11 +121,11 @@ class UserControllerTest extends ControllerTestSupport {
                                                    .password(password)
                                                    .build();
 
-        when(userService.login(any())).thenReturn(UserSingleResponse.builder()
-                                                                    .email(email)
-                                                                    .username(username)
-                                                                    .token("eyJ")
-                                                                    .build());
+        when(userService.login(any())).thenReturn(UserServiceResponse.builder()
+                                                                     .email(email)
+                                                                     .username(username)
+                                                                     .token("eyJ")
+                                                                     .build());
 
         // When // Then
         mockMvc.perform(

@@ -5,7 +5,7 @@ import io.hoon.realworld.api.controller.user.request.UserUpdateRequest;
 import io.hoon.realworld.api.service.user.UserService;
 import io.hoon.realworld.api.service.user.request.UserLoginServiceRequest;
 import io.hoon.realworld.api.service.user.request.UserSignUpServiceRequest;
-import io.hoon.realworld.api.service.user.response.UserSingleResponse;
+import io.hoon.realworld.api.service.user.response.UserServiceResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,7 +33,7 @@ public class UserControllerTestWithSecurity extends IntegrationTestSupport {
     private static final String email = "hoon@email.com";
     private static final String username = "hoon";
     private static final String password = "password";
-    private UserSingleResponse response = null;
+    private UserServiceResponse response = null;
 
     @BeforeEach
     void setUp() {

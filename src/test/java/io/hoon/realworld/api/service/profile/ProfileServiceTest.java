@@ -4,7 +4,7 @@ import io.hoon.realworld.IntegrationTestSupport;
 import io.hoon.realworld.api.service.profile.response.ProfileSingleResponse;
 import io.hoon.realworld.api.service.user.UserService;
 import io.hoon.realworld.api.service.user.request.UserSignUpServiceRequest;
-import io.hoon.realworld.api.service.user.response.UserSingleResponse;
+import io.hoon.realworld.api.service.user.response.UserServiceResponse;
 import io.hoon.realworld.domain.user.follow.FollowRepository;
 import io.hoon.realworld.domain.user.User;
 import io.hoon.realworld.domain.user.UserRepository;
@@ -53,10 +53,10 @@ class ProfileServiceTest extends IntegrationTestSupport {
                                                                                      .password("1234")
                                                                                      .build();
 
-        UserSingleResponse userSingleResponse = userService.signUp(userSignUpServiceRequest2);
+        UserServiceResponse userServiceResponse = userService.signUp(userSignUpServiceRequest2);
 
         //-- id 조회
-        Optional<User> emily = userService.findByEmail(userSingleResponse.getEmail());
+        Optional<User> emily = userService.findByEmail(userServiceResponse.getEmail());
         myId = emily.get().getId();
     }
 
