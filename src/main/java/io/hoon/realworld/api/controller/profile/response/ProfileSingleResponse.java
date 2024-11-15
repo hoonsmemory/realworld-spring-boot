@@ -7,5 +7,5 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public class ProfileSingleResponse {
-    private final ProfileServiceResponse user;
+    private final ProfileServiceResponse profile;
 }
