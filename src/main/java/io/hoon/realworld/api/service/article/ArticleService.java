@@ -3,9 +3,9 @@ package io.hoon.realworld.api.service.article;
 import io.hoon.realworld.api.service.article.request.ArticleCreateServiceRequest;
 import io.hoon.realworld.api.service.article.request.ArticleGetArticlesServiceRequest;
 import io.hoon.realworld.api.service.article.request.ArticleUpdateServiceRequest;
-import io.hoon.realworld.api.controller.article.response.ArticleMultiResponse;
 import io.hoon.realworld.api.service.article.response.ArticleServiceResponse;
 import io.hoon.realworld.api.service.profile.ProfileService;
+import io.hoon.realworld.api.service.user.UserService;
 import io.hoon.realworld.domain.article.Article;
 import io.hoon.realworld.domain.article.ArticleRepository;
 import io.hoon.realworld.domain.article.favorite.Favorite;
@@ -31,6 +31,7 @@ public class ArticleService {
     private final TagRepository tagRepository;
     private final FavoriteRepository favoriteRepository;
     private final ProfileService profileService;
+    private final UserService userService;
 
     @Transactional
     public ArticleServiceResponse createArticle(AuthUser user, ArticleCreateServiceRequest request) {
@@ -137,7 +138,7 @@ public class ArticleService {
             return new AddtionalInfo(isFollowing, favorited, favoritesCount);
         }
 
-        isFollowing = profileService.get(user.getId(), article.getAuthor().getUsername())
+        isFollowing = profileService.getFollow(user.getId(), article.getAuthor().getUsername())
                                     .isFollowing();
         favorited = favoriteList.stream()
                                 .anyMatch(f -> f.getUser()

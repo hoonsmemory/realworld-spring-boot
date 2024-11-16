@@ -20,7 +20,7 @@ public class ProfileService {
     private final UserService userService;
     private final FollowRepository followRepository;
 
-    public ProfileServiceResponse get(long myId, String targetUsername) {
+    public ProfileServiceResponse getFollow(long myId, String targetUsername) {
         User target = userService.findByUsername(targetUsername)
                                  .orElseThrow(() -> new NoSuchElementException(targetUsername));
 

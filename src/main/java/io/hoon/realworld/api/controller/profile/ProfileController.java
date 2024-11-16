@@ -14,7 +14,7 @@ public class ProfileController {
 
     @GetMapping("/api/profiles/{username}")
     public ProfileSingleResponse get(AuthUser user, @PathVariable String username) {
-        return new ProfileSingleResponse(profileService.get(user.getId(), username));
+        return new ProfileSingleResponse(profileService.getFollow(user.getId(), username));
     }
 
     @PostMapping("/api/profiles/{username}/follow")

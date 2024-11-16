@@ -69,9 +69,9 @@ class ProfileServiceTest extends IntegrationTestSupport {
     @Test
     @DisplayName("다른 회원의 프로필을 조회한다.")
     @Transactional
-    void getProfile() throws Exception {
+    void getFollowProfile() throws Exception {
         // When
-        ProfileServiceResponse response = profileService.get(myId, "hoon");
+        ProfileServiceResponse response = profileService.getFollow(myId, "hoon");
 
         // Then
         assertThat(response)
