@@ -4,8 +4,11 @@ import io.hoon.realworld.api.controller.article.request.ArticleCreateRequest;
 import io.hoon.realworld.api.controller.article.request.ArticleUpdateRequest;
 import io.hoon.realworld.api.controller.article.response.ArticleMultiResponse;
 import io.hoon.realworld.api.controller.article.response.ArticleSingleResponse;
+import io.hoon.realworld.api.controller.article.response.CommentMultiResponse;
+import io.hoon.realworld.api.controller.article.response.CommentSingleResponse;
 import io.hoon.realworld.api.service.article.ArticleService;
 import io.hoon.realworld.api.service.article.request.ArticleGetArticlesServiceRequest;
+import io.hoon.realworld.api.service.comment.CommentService;
 import io.hoon.realworld.security.AuthUser;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class ArticleController {
 
     private final ArticleService articleService;
+    private final CommentService commentService;
 
     @PostMapping("/api/articles")
     public ArticleSingleResponse createArticle(AuthUser user, @Valid @RequestBody ArticleCreateRequest request) {
@@ -69,5 +73,20 @@ public class ArticleController {
                                                 @RequestParam(value = "limit", required = false, defaultValue = "0") int offset,
                                                 @RequestParam(value = "offset", required = false, defaultValue = "20") int limit) {
         return ArticleMultiResponse.of(articleService.getFeedArticles(user, PageRequest.of(offset, limit)));
+    }
+
+    @PostMapping("/api/articles/{slug}/comments")
+    public CommentSingleResponse createComment(AuthUser user, @PathVariable String slug, @RequestBody String body) {
+        return new CommentSingleResponse(commentService.createComment(user, slug, body));
+    }
+
+    @GetMapping("/api/articles/{slug}/comments")
+    public CommentMultiResponse getComments(AuthUser user, @PathVariable String slug) {
+        return new CommentMultiResponse(commentService.getComments(user, slug));
+    }
+
+    @DeleteMapping("/api/articles/{slug}/comments/{id}")
+    public void deleteComment(AuthUser user, @PathVariable String slug, @PathVariable long id) {
+        commentService.deleteComment(user, slug, id);
     }
 }

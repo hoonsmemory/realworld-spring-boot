@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.hoon.realworld.api.controller.article.ArticleController;
 import io.hoon.realworld.api.controller.user.UserController;
 import io.hoon.realworld.api.service.article.ArticleService;
+import io.hoon.realworld.api.service.comment.CommentService;
 import io.hoon.realworld.api.service.user.UserService;
 import io.hoon.realworld.config.AppConfig;
 import io.hoon.realworld.domain.user.UserRepository;
@@ -38,4 +39,7 @@ public abstract class ControllerTestSupport {
 
     @MockBean
     protected ArticleService articleService;
+
+    @MockBean
+    protected CommentService commentService;
 }

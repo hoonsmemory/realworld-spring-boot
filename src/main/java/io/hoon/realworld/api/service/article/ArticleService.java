@@ -122,7 +122,7 @@ public class ArticleService {
         return ArticleServiceResponse.of(article, addtionalInfo.isFollowing(), addtionalInfo.favorited(), addtionalInfo.favoritesCount());
     }
 
-    private Article findBySlug(String slug) {
+    public Article findBySlug(String slug) {
         return articleRepository.findBySlug(slug)
                                 .orElseThrow(() -> new IllegalArgumentException(Error.ARTICLE_NOT_FOUND.getMessage()));
     }

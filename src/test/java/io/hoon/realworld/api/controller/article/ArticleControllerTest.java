@@ -2,7 +2,9 @@ package io.hoon.realworld.api.controller.article;
 
 import io.hoon.realworld.ControllerTestSupport;
 import io.hoon.realworld.api.service.article.response.ArticleServiceResponse;
+import io.hoon.realworld.api.service.comment.response.CommentServiceResponse;
 import io.hoon.realworld.domain.article.Article;
+import io.hoon.realworld.domain.article.comment.Comment;
 import io.hoon.realworld.domain.article.tag.Tag;
 import io.hoon.realworld.domain.user.User;
 import org.junit.jupiter.api.DisplayName;
@@ -69,5 +71,31 @@ class ArticleControllerTest extends ControllerTestSupport {
                .andExpect(jsonPath("$.articles[0].favorited").value(false))
                .andExpect(jsonPath("$.articles[0].favoritesCount").value(0))
                .andExpect(jsonPath("$.articles[0].author.username").value("hoon"));
+    }
+
+    @Test
+    @DisplayName("아티클의 코멘트를 조회한다.")
+    void getComments() throws Exception {
+        // Given
+        Article article = Article.builder().title("article subject").description("설명").body("내용").build();
+        article.addAuthor(User.create("hoon@email.com", "hoon", "password"));
+        article.addTag(Tag.builder().name("tag1").build());
+        article.addTag(Tag.builder().name("tag2").build());
+
+        User author = User.builder().email("hoon@email.com").username("hoon").bio("bio").image("https://image.img").build();
+
+    	when(commentService.getComments(any(), any())).thenReturn(List.of(
+                CommentServiceResponse.of(Comment.builder().id(1l).body("comment").article(article).author(author).build(), false)
+        ));
+
+        // When // Then
+        mockMvc.perform(get("/api/articles/{slug}/comments", "article-subject"))
+       .andDo(print())
+       .andExpect(status().isOk())
+       .andExpect(jsonPath("$.comments[0].id").value(1l))
+       .andExpect(jsonPath("$.comments[0].body").value("comment"))
+       .andExpect(jsonPath("$.comments[0].author.username").value("hoon"))
+       .andExpect(jsonPath("$.comments[0].author.bio").value("bio"))
+       .andExpect(jsonPath("$.comments[0].author.image").value("https://image.img"));
     }
 }

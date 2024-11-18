@@ -5,10 +5,12 @@ import io.hoon.realworld.api.controller.article.request.ArticleCreateRequest;
 import io.hoon.realworld.api.controller.article.request.ArticleUpdateRequest;
 import io.hoon.realworld.api.service.article.ArticleService;
 import io.hoon.realworld.api.service.article.request.ArticleCreateServiceRequest;
+import io.hoon.realworld.api.service.comment.CommentService;
 import io.hoon.realworld.api.service.profile.ProfileService;
 import io.hoon.realworld.api.service.user.UserService;
 import io.hoon.realworld.api.service.user.request.UserLoginServiceRequest;
 import io.hoon.realworld.api.service.user.request.UserSignUpServiceRequest;
+import io.hoon.realworld.api.service.user.response.UserServiceResponse;
 import io.hoon.realworld.domain.article.ArticleRepository;
 import io.hoon.realworld.domain.user.User;
 import io.hoon.realworld.security.AuthUser;
@@ -46,6 +48,9 @@ class ArticleControllerTestWithSecurity extends IntegrationTestSupport {
     @Autowired
     private ProfileService profileService;
 
+    @Autowired
+    private CommentService commentService;
+
     private String token;
 
     private AuthUser authUser;
@@ -71,7 +76,8 @@ class ArticleControllerTestWithSecurity extends IntegrationTestSupport {
                            .getToken();
 
         //-- user 조회
-        User user = userService.findByEmail(email).get();
+        User user = userService.findByEmail(email)
+                               .get();
         authUser = AuthUser.builder()
                            .id(user.getId())
                            .email(user.getEmail())
@@ -246,8 +252,8 @@ class ArticleControllerTestWithSecurity extends IntegrationTestSupport {
                        .contentType(MediaType.APPLICATION_JSON))
                .andDo(print())
                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.article.favorited").value(true))
-                .andExpect(jsonPath("$.article.favoritesCount").value(1));
+               .andExpect(jsonPath("$.article.favorited").value(true))
+               .andExpect(jsonPath("$.article.favoritesCount").value(1));
     }
 
     @Test
@@ -279,8 +285,8 @@ class ArticleControllerTestWithSecurity extends IntegrationTestSupport {
 
     @Test
     @DisplayName("팔로우한 회원의 아티클을 조회한다.")
+    @Transactional
     void getFeedArticles() throws Exception {
-        // Given
         // Given
         //-- 팔로우받을 회원 생성
         userService.signUp(UserSignUpServiceRequest.builder()
@@ -289,12 +295,12 @@ class ArticleControllerTestWithSecurity extends IntegrationTestSupport {
                                                    .password("1234")
                                                    .build());
 
-        User byEmail = userService.findByEmail("emily@email.com").get();
+        User user = userService.findByEmail("emily@email.com").get();
         AuthUser followee = AuthUser.builder()
-                                         .id(byEmail.getId())
-                                         .email(byEmail.getEmail())
-                                         .username(byEmail.getUsername())
-                                         .build();
+                                    .id(user.getId())
+                                    .email(user.getEmail())
+                                    .username(user.getUsername())
+                                    .build();
 
         // -- 팔로우
         profileService.follow(authUser.getId(), followee.getUsername());
@@ -329,6 +335,67 @@ class ArticleControllerTestWithSecurity extends IntegrationTestSupport {
                .andExpect(jsonPath("$.articles[0].slug").value("제목3"))
                .andExpect(jsonPath("$.articles[1].slug").value("제목2"))
                .andExpect(jsonPath("$.articles[2].slug").value("제목"));
+    }
+
+    @Test
+    @DisplayName("코멘트를 생성한다.")
+    void createComment() throws Exception {
+        // Given
+        // -- 아티클 생성
+        articleService.createArticle(authUser, ArticleCreateServiceRequest.builder()
+                                                                          .title("제목")
+                                                                          .description("설명")
+                                                                          .body("내용")
+                                                                          .tagList(List.of("tag1", "tag2"))
+                                                                          .build());
+
+        //-- 코멘트를 생성할 회원 생성 & 로그인
+        userService.signUp(UserSignUpServiceRequest.builder()
+                                                   .email("emily@email.com")
+                                                   .username("emily")
+                                                   .password("1234")
+                                                   .build());
+
+        UserServiceResponse commentUser = userService.login(UserLoginServiceRequest.builder()
+                                                                                   .email("emily@email.com")
+                                                                                   .password("1234")
+                                                                                   .build());
+
+        // When // Then
+        mockMvc.perform(post("/api/articles/{slug}/comments", "제목")
+                       .header("Authorization", "Token " + commentUser.getToken())
+                       .contentType(MediaType.TEXT_PLAIN)
+                       .content("코멘트"))
+               .andDo(print())
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.comment.body").value("코멘트"))
+               .andExpect(jsonPath("$.comment.author.following").value(false));
+    }
+
+    @Test
+    @DisplayName("코멘트를 삭제한다.")
+    void deleteComment() throws Exception {
+        // Given
+        // -- 아티클 생성
+        ArticleCreateRequest articleCreateRequest = ArticleCreateRequest.builder()
+                                                                        .title("제목")
+                                                                        .description("설명")
+                                                                        .body("내용")
+                                                                        .tagList(List.of("tag1", "tag2"))
+                                                                        .build();
+        articleService.createArticle(authUser, articleCreateRequest.toServiceRequest());
+
+        // -- 코멘트 생성
+        Long commentId = commentService.createComment(authUser, "제목", "코멘트").getId();
+
+        // When // Then
+        mockMvc.perform(delete("/api/articles/제목/comments/" + commentId)
+                       .header("Authorization", "Token " + token)
+                       .contentType(MediaType.APPLICATION_JSON))
+               .andDo(print())
+               .andExpect(status().isOk());
+
+        assertThat(commentService.getComments(authUser, "제목")).isEmpty();
     }
 
 }

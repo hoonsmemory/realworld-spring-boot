@@ -88,14 +88,14 @@ public class Article extends BaseEntity {
         this.author = author;
     }
 
-    public void favorite(Favorite favorite) {
+    public void favorite(@NotNull Favorite favorite) {
         this.favoriteList.add(favorite);
         if (favorite.getArticle() != this) {
             favorite.setArticle(this);
         }
     }
 
-    public void unfavorite(Favorite favorite) {
+    public void unfavorite(@NotNull Favorite favorite) {
         this.favoriteList.remove(favorite);
     }
 
