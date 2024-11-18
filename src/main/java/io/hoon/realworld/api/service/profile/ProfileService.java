@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Transactional(readOnly = true)
@@ -68,5 +69,9 @@ public class ProfileService {
         followRepository.delete(follow);
 
         return ProfileServiceResponse.of(target, false);
+    }
+
+    public List<Follow> getFollwings(long myId) {
+        return followRepository.findByFollowerId(myId).orElse(List.of());
     }
 }

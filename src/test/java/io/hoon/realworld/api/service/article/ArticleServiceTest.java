@@ -4,8 +4,8 @@ import io.hoon.realworld.IntegrationTestSupport;
 import io.hoon.realworld.api.service.article.request.ArticleCreateServiceRequest;
 import io.hoon.realworld.api.service.article.request.ArticleGetArticlesServiceRequest;
 import io.hoon.realworld.api.service.article.request.ArticleUpdateServiceRequest;
-import io.hoon.realworld.api.controller.article.response.ArticleMultiResponse;
 import io.hoon.realworld.api.service.article.response.ArticleServiceResponse;
+import io.hoon.realworld.api.service.profile.ProfileService;
 import io.hoon.realworld.api.service.user.UserService;
 import io.hoon.realworld.api.service.user.request.UserLoginServiceRequest;
 import io.hoon.realworld.api.service.user.request.UserSignUpServiceRequest;
@@ -43,8 +43,10 @@ class ArticleServiceTest extends IntegrationTestSupport {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private ProfileService profileService;
+
     private AuthUser authUser;
-    private static long authorId = 0l;
 
     @BeforeEach
     void setUp() {
@@ -62,8 +64,7 @@ class ArticleServiceTest extends IntegrationTestSupport {
                                                  .build());
 
         //-- user 조회
-        User user = userService.findByEmail("hoon@email.com")
-                               .get();
+        User user = userService.findByEmail("hoon@email.com").get();
         authUser = AuthUser.builder()
                            .id(user.getId())
                            .email(user.getEmail())
@@ -305,5 +306,61 @@ class ArticleServiceTest extends IntegrationTestSupport {
                                                           .pageable(PageRequest.of(0, 10))
                                                           .build(), 1)
         );
+    }
+
+    @Test
+    @DisplayName("팔로우한 회원의 아티클을 조회한다.")
+    @Transactional
+    void getFeedArticles() throws Exception {
+        // Given
+        //-- 팔로우할 회원 생성
+        userService.signUp(UserSignUpServiceRequest.builder()
+                                                   .email("emily@email.com")
+                                                   .username("emily")
+                                                   .password("1234")
+                                                   .build());
+
+        User byEmail = userService.findByEmail("emily@email.com").get();
+        AuthUser followingUser = AuthUser.builder()
+                                         .id(byEmail.getId())
+                                         .email(byEmail.getEmail())
+                                         .username(byEmail.getUsername())
+                                         .build();
+
+        // -- 팔로우
+        profileService.follow(followingUser.getId(), authUser.getUsername());
+
+        // -- 아티클 생성
+        articleService.createArticle(authUser, ArticleCreateServiceRequest.builder()
+                                                                          .title("제목")
+                                                                          .description("설명")
+                                                                          .body("내용")
+                                                                          .tagList(List.of("tag1", "tag2"))
+                                                                          .build());
+
+        articleService.createArticle(authUser, ArticleCreateServiceRequest.builder()
+                                                                          .title("제목2")
+                                                                          .description("설명2")
+                                                                          .body("내용2")
+                                                                          .tagList(List.of("tag2", "tag3"))
+                                                                          .build());
+
+        articleService.createArticle(authUser, ArticleCreateServiceRequest.builder()
+                                                                          .title("제목3")
+                                                                          .description("설명3")
+                                                                          .body("내용3")
+                                                                          .tagList(List.of("tag1", "tag3"))
+                                                                          .build());
+
+        // When
+        List<ArticleServiceResponse> response = articleService.getFeedArticles(followingUser, PageRequest.of(0, 10));
+
+        // Then
+        assertThat(response.size()).isEqualTo(3);
+        assertThat(response).extracting("title")
+                            .contains("제목", "제목2", "제목3");
+        assertThat(response.get(0)).extracting("title").isEqualTo("제목3");
+        assertThat(response.get(1)).extracting("title").isEqualTo("제목2");
+        assertThat(response.get(2)).extracting("title").isEqualTo("제목");
     }
 }

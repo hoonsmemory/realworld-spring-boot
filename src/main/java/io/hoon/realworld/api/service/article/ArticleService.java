@@ -154,16 +154,39 @@ public class ArticleService {
         String favorited = request.getFavorited();
         Pageable pageable = request.getPageable();
 
-        List<Article> articles = articleRepository.findByArguments(tag, author, favorited, pageable)
-                                                  .orElseThrow(() -> new IllegalArgumentException(Error.ARTICLE_NOT_FOUND.getMessage()));
+        return articleRepository.findByArguments(tag, author, favorited, pageable)
+                                .orElseThrow(() -> new IllegalArgumentException(Error.ARTICLE_NOT_FOUND.getMessage()))
+                                .stream()
+                                .map(article -> {
+                                    AddtionalInfo addtionalInfo = getArticleAdditionalInfo(user, article);
+                                    return ArticleServiceResponse.of(article,
+                                            addtionalInfo.isFollowing(),
+                                            addtionalInfo.favorited(),
+                                            addtionalInfo.favoritesCount());
+                                })
+                                .toList();
+    }
 
-        return articles.stream()
-                       .map(article -> {
-                           AddtionalInfo addtionalInfo = getArticleAdditionalInfo(user, article);
-                           return ArticleServiceResponse.of(article,
-                                   addtionalInfo.isFollowing(),
-                                   addtionalInfo.favorited(),
-                                   addtionalInfo.favoritesCount());
-                       }).toList();
+    public List<ArticleServiceResponse> getFeedArticles(AuthUser user, Pageable pageable) {
+        List<Long> followeeIds = profileService.getFollwings(user.getId())
+                                               .stream()
+                                               .map(f -> f.getFollowee()
+                                                          .getId())
+                                               .toList();
+
+        if(followeeIds.isEmpty()) {
+            return List.of();
+        }
+
+        return articleRepository.findByAuthorIds(followeeIds, pageable)
+                                .orElse(List.of())
+                                .stream()
+                                .map(article -> {
+                                    AddtionalInfo addtionalInfo = getArticleAdditionalInfo(user, article);
+                                    return ArticleServiceResponse.of(article,
+                                            addtionalInfo.isFollowing(),
+                                            addtionalInfo.favorited(),
+                                            addtionalInfo.favoritesCount());
+                                }).toList();
     }
 }

@@ -13,7 +13,7 @@ public class ProfileController {
     private final ProfileService profileService;
 
     @GetMapping("/api/profiles/{username}")
-    public ProfileSingleResponse get(AuthUser user, @PathVariable String username) {
+    public ProfileSingleResponse getFollow(AuthUser user, @PathVariable String username) {
         return new ProfileSingleResponse(profileService.getFollow(user.getId(), username));
     }
 

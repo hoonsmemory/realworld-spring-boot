@@ -24,4 +24,11 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
                                             @Param("author") String author,
                                             @Param("favorited") String favorited,
                                             Pageable pageable);
+
+    @Query("""
+            SELECT a FROM Article a
+            WHERE a.author.id IN :ids
+            ORDER BY a.createdAt DESC
+           """)
+    Optional<List<Article>> findByAuthorIds(List<Long> ids, Pageable pageable);
 }

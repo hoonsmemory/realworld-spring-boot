@@ -48,7 +48,7 @@ public class ArticleController {
         return new ArticleSingleResponse(articleService.getArticle(user, slug));
     }
 
-    @GetMapping("api/articles")
+    @GetMapping("/api/articles")
     public ArticleMultiResponse getArticles(AuthUser user,
                                             @RequestParam(value = "tag", required = false) String tag,
                                             @RequestParam(value = "author", required = false) String author,
@@ -62,5 +62,12 @@ public class ArticleController {
                                                                                                         .favorited(favorited)
                                                                                                         .pageable(PageRequest.of(offset, limit))
                                                                                                         .build()));
+    }
+
+    @GetMapping("/api/articles/feed")
+    public ArticleMultiResponse getFeedArticles(AuthUser user,
+                                                @RequestParam(value = "limit", required = false, defaultValue = "0") int offset,
+                                                @RequestParam(value = "offset", required = false, defaultValue = "20") int limit) {
+        return ArticleMultiResponse.of(articleService.getFeedArticles(user, PageRequest.of(offset, limit)));
     }
 }

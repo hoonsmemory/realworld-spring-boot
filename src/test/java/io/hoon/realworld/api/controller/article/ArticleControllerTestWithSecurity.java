@@ -4,6 +4,8 @@ import io.hoon.realworld.IntegrationTestSupport;
 import io.hoon.realworld.api.controller.article.request.ArticleCreateRequest;
 import io.hoon.realworld.api.controller.article.request.ArticleUpdateRequest;
 import io.hoon.realworld.api.service.article.ArticleService;
+import io.hoon.realworld.api.service.article.request.ArticleCreateServiceRequest;
+import io.hoon.realworld.api.service.profile.ProfileService;
 import io.hoon.realworld.api.service.user.UserService;
 import io.hoon.realworld.api.service.user.request.UserLoginServiceRequest;
 import io.hoon.realworld.api.service.user.request.UserSignUpServiceRequest;
@@ -40,6 +42,9 @@ class ArticleControllerTestWithSecurity extends IntegrationTestSupport {
 
     @Autowired
     private ArticleRepository articleRepository;
+
+    @Autowired
+    private ProfileService profileService;
 
     private String token;
 
@@ -270,6 +275,60 @@ class ArticleControllerTestWithSecurity extends IntegrationTestSupport {
                .andExpect(status().isOk())
                .andExpect(jsonPath("$.article.favorited").value(false))
                .andExpect(jsonPath("$.article.favoritesCount").value(0));
+    }
+
+    @Test
+    @DisplayName("팔로우한 회원의 아티클을 조회한다.")
+    void getFeedArticles() throws Exception {
+        // Given
+        // Given
+        //-- 팔로우받을 회원 생성
+        userService.signUp(UserSignUpServiceRequest.builder()
+                                                   .email("emily@email.com")
+                                                   .username("emily")
+                                                   .password("1234")
+                                                   .build());
+
+        User byEmail = userService.findByEmail("emily@email.com").get();
+        AuthUser followee = AuthUser.builder()
+                                         .id(byEmail.getId())
+                                         .email(byEmail.getEmail())
+                                         .username(byEmail.getUsername())
+                                         .build();
+
+        // -- 팔로우
+        profileService.follow(authUser.getId(), followee.getUsername());
+
+        // -- 아티클 생성
+        articleService.createArticle(followee, ArticleCreateServiceRequest.builder()
+                                                                          .title("제목")
+                                                                          .description("설명")
+                                                                          .body("내용")
+                                                                          .tagList(List.of("tag1", "tag2"))
+                                                                          .build());
+
+        articleService.createArticle(followee, ArticleCreateServiceRequest.builder()
+                                                                          .title("제목2")
+                                                                          .description("설명2")
+                                                                          .body("내용2")
+                                                                          .tagList(List.of("tag2", "tag3"))
+                                                                          .build());
+
+        articleService.createArticle(followee, ArticleCreateServiceRequest.builder()
+                                                                          .title("제목3")
+                                                                          .description("설명3")
+                                                                          .body("내용3")
+                                                                          .tagList(List.of("tag1", "tag3"))
+                                                                          .build());
+
+        // When // Then
+        mockMvc.perform(get("/api/articles/feed")
+                       .header("Authorization", "Token " + token))
+               .andDo(print())
+               .andExpect(status().isOk())
+               .andExpect(jsonPath("$.articles[0].slug").value("제목3"))
+               .andExpect(jsonPath("$.articles[1].slug").value("제목2"))
+               .andExpect(jsonPath("$.articles[2].slug").value("제목"));
     }
 
 }
