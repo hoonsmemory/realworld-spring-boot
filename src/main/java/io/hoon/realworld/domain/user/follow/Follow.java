@@ -21,11 +21,11 @@ public class Follow extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false, name = "followee")
+    @JoinColumn(nullable = false, name = "followee_id")
     private User followee;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false, name = "follower")
+    @JoinColumn(nullable = false, name = "follower_id")
     private User follower;
 
     @Builder

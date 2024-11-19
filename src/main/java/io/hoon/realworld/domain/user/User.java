@@ -29,8 +29,10 @@ public class User extends BaseEntity {
     @Column(length = 200, nullable = false)
     private String password;
 
+    @Column(length = 500)
     private String bio;
 
+    @Column(length = 200)
     private String image;
 
     @Transient
