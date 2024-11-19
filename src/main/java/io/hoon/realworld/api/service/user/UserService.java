@@ -74,8 +74,7 @@ public class UserService {
         request.getBio()
                .ifPresent(userEntity::updateBio);
 
-        User savedUser = userRepository.save(userEntity);
-        return UserServiceResponse.of(savedUser);
+        return UserServiceResponse.of(userEntity);
     }
 
     public Optional<User> findByEmail(String email) {
