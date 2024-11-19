@@ -48,6 +48,9 @@ deciding which technology stack to choose through comparisons with various other
 > **Note:** I paid attention to data types, but did not pay much attention to size.
 
 - [schema.sql](database/schema.sql)
+![Untitled-2024-11-19-1332](https://github.com/user-attachments/assets/ff4aa725-c8d5-4734-8383-04a4580f9200)
+
+
 
 # Getting started
 
@@ -68,4 +71,11 @@ deciding which technology stack to choose through comparisons with various other
 ```shell
 ./gradlew test
 ```
+
+## Run integration test
+
+1. Run application (**important**)
+2. [Run integration test](api/README.md#running-api-tests-locally)
+
+![스크린샷 2024-11-19 오후 3 20 28](https://github.com/user-attachments/assets/916daa64-df6c-47b4-8981-0c4e6ada2330)
 
