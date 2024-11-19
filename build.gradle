@@ -3,6 +3,7 @@ plugins {
     id 'org.springframework.boot' version '3.2.10'
     id 'io.spring.dependency-management' version '1.1.6'
     id "org.asciidoctor.jvm.convert" version "3.3.2"
+    id 'jacoco'
 }
 
 group = 'io.hoon.realworld'
@@ -26,7 +27,6 @@ repositories {
 }
 
 dependencies {
-    // Spring boot
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -36,31 +36,50 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
-    // test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-    // lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
-    // h2
     runtimeOnly 'com.h2database:h2'
 
-    // RestDocs
     asciidoctorExt 'org.springframework.restdocs:spring-restdocs-asciidoctor'
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
 
-    // p6spy
     implementation 'com.github.gavlyukovskiy:p6spy-spring-boot-starter:1.9.0'
 }
 
 tasks.named('test') {
     useJUnitPlatform()
+    finalizedBy(tasks.named('jacocoTestReport'))
 }
 
-ext { // 전역 변수
+jacoco {
+    toolVersion = "0.8.10"
+}
+
+tasks.jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+}
+
+tasks.jacocoTestCoverageVerification {
+    dependsOn jacocoTestReport
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.8
+            }
+        }
+    }
+}
+
+ext {
     snippetsDir = file('build/generated-snippets')
 }
 
@@ -72,10 +91,10 @@ asciidoctor {
     inputs.dir snippetsDir
     configurations 'asciidoctorExt'
 
-    sources { // 특정 파일만 html로 만든다.
+    sources {
         include("**/index.adoc")
     }
-    baseDirFollowsSourceFile() // 다른 adoc 파일을 include 할 때 경로를 baseDir로 맞춘다.
+    baseDirFollowsSourceFile()
     dependsOn test
 }
 
