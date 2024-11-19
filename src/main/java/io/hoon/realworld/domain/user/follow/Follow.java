@@ -34,11 +34,4 @@ public class Follow extends BaseEntity {
         this.followee = followee;
         this.follower = follower;
     }
-
-    public Follow create(User followee, User follower) {
-        return Follow.builder()
-                     .followee(followee)
-                     .follower(follower)
-                     .build();
-    }
 }
