@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -63,6 +64,7 @@ class CommentServiceTest extends IntegrationTestSupport {
 
     @Test
     @DisplayName("코멘트를 생성한다.")
+    @Transactional
     void createComment() throws Exception {
         // Given
         User user = userService.findByEmail("emily@email.com").get();
@@ -84,6 +86,7 @@ class CommentServiceTest extends IntegrationTestSupport {
 
     @Test
     @DisplayName("아티클의 코멘트를 조회한다.")
+    @Transactional
     void getComments() throws Exception {
         // Given
         //-- 코멘트 생성
@@ -109,6 +112,7 @@ class CommentServiceTest extends IntegrationTestSupport {
 
     @Test
     @DisplayName("코멘트를 삭제한다.")
+    @Transactional
     void deleteComment() throws Exception {
         // Given
         User user = userService.findByEmail("emily@email.com").get();

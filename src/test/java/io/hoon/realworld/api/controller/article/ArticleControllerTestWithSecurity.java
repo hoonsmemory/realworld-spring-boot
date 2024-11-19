@@ -339,6 +339,7 @@ class ArticleControllerTestWithSecurity extends IntegrationTestSupport {
 
     @Test
     @DisplayName("코멘트를 생성한다.")
+    @Transactional
     void createComment() throws Exception {
         // Given
         // -- 아티클 생성
@@ -374,6 +375,7 @@ class ArticleControllerTestWithSecurity extends IntegrationTestSupport {
 
     @Test
     @DisplayName("코멘트를 삭제한다.")
+    @Transactional
     void deleteComment() throws Exception {
         // Given
         // -- 아티클 생성
